@@ -224,8 +224,8 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 	roughness : 0.4,
 
 	aoMap:map_aoMap_floor,
-	aoMapIntensity : 0.1,
-	envMapIntensity: 0.5,
+	aoMapIntensity : 0.1, 
+	envMapIntensity: 1,
 
 	normalMap: map_normal_floor,
 	normalScale : new THREE.Vector2(0.5, 0.5),
