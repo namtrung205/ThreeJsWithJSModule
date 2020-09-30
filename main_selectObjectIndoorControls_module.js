@@ -31,6 +31,7 @@ var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeig
 camera.position.set( 0, 0, 50 );
 var frustumSize = 20;
 var renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true });
+renderer.shadowMap.enabled = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
 container.appendChild( renderer.domElement );
@@ -296,32 +297,6 @@ function init() {
 	composer.addPass( outlinePass );
 	readModel();
 
-
-	// // 新建鼠标光标
-	// let helperMaterial = new THREE.MeshBasicMaterial();
-	// helperMaterial.transparent = true;
-	// helperMaterial.opacity = 0.2;
-	// let helperGeometry = new THREE.CircleBufferGeometry( 2.0, 64 );
-	// let mouseHelper = new THREE.Mesh( helperGeometry, helperMaterial );
-
-	// let ringMaterial = new THREE.MeshBasicMaterial();
-	// ringMaterial.transparent = true;
-	// ringMaterial.opacity = 0.8;
-	// let ringGeometry = new THREE.RingBufferGeometry( 2.0, 2.2, 64 );
-	// let ring = new THREE.Mesh( ringGeometry, ringMaterial );
-	// mouseHelper.add( ring );
-
-	// mouseHelper.visible = false;
-	// mouseHelper.renderOrder = 1;
-
-	// var quaternion = new THREE.Quaternion();
-	// quaternion.setFromAxisAngle( new THREE.Vector3( 0, 0, 1), Math.PI / 2 );
-	// mouseHelper.applyQuaternion(quaternion)
-
-
-	// scene.add( mouseHelper );
-
-
 	// Add Controls Attributer
 	controls.addEventListener( 'move', function ( event ) 
 	{
@@ -394,6 +369,10 @@ function readModel() {
 				{
 					child.material = metal_mat;
 				}
+
+				child.castShadow = true;
+				child.receiveShadow = true;
+
 			} );
 			scene.add(root);
 			console.log("loaded FBX")
