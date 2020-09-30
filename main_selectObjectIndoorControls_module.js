@@ -298,8 +298,11 @@ function init() {
 	readModel();
 
 	// Add Controls Attributer
+	controls.ground.push( floor_plane );
 	controls.addEventListener( 'move', function ( event ) 
 	{
+
+		console.log(controls.ground);
 		let intersect = event.intersect;
 		let normal = intersect.face.normal;
 
@@ -319,15 +322,67 @@ function init() {
 	} );
 
 
-	controls.ground.push( floor_plane );
+	
 }
 
 function readModel() {
 		//FBXloader
 		const fbxLoader = new FBXLoader();
-		fbxLoader.load('./models/fbx/Chair/source/chair.fbx', (root) => {
+		// fbxLoader.load('./models/fbx/Chair/source/chair.fbx', (root) => {
+		// 	var num = 0;
+		// 	root.traverse( function ( child ) {
+		// 		if ( child instanceof THREE.Mesh ) 
+		// 		{
+		// 			if(
+		// 				child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
+		// 				child.name ==="polySurface47" || child.name ==="polySurface32")
+		// 			{
+		// 				child.material = platic_mat;
+		// 			}
+		// 			else if(child.name ==="polySurface46" || child.name ==="polySurface48" ||
+		// 					child.name ==="polySurface49" || child.name ==="polySurface50" )
+		// 			{
+		// 				child.material = leather_mat;
+		// 			}
+		// 			else if(
+		// 					child.name ==="polySurface44" || child.name ==="polySurface45" ||
+		// 					child.name ==="polySurface42" || child.name ==="polySurface43" ||
+		// 					child.name ==="polySurface51" || child.name === "polySurface16" ||
+		// 					child.name ==="polySurface27" ||  child.name ==="polySurface28" ||
+		// 					child.name ==="polySurface29" ||child.name ==="polySurface30" || 
+		// 					child.name ==="polySurface31")
+		// 			{
+		// 				child.material = wood_mat;
+		// 			}
+		// 		else if(
+		// 			child.name ==="polySurface19" || child.name ==="polySurface24" ||
+		// 			child.name ==="polySurface36" || child.name ==="polySurface37" ||
+		// 			child.name ==="polySurface38" || child.name ==="polySurface39" ||
+		// 			child.name ==="polySurface40" || child.name ==="polySurface41" ||
+		// 			child.name ==="polySurface34" || child.name ==="polySurface35" ||
+		// 			child.name ==="polySurface25" ||child.name ==="polySurface20"  ||
+		// 			child.name ==="polySurface26" || child.name ==="polySurface27" ||
+		// 			child.name ==="polySurface22" || child.name ==="polySurface23")
+		// 			{
+		// 				child.material = metal_mat;
+		// 				// child.visible = false;
+		// 			}
+		// 		}
+		// 		else
+		// 		{
+		// 			child.material = metal_mat;
+		// 		}
+		// 	} );
+		// 	scene.add(root);
+		// 	console.log("loaded FBX")
+		// 	fitCameraToObject(camera, root, 15);
+		// });
+
+
+		fbxLoader.load('./models/fbx/Hook/source/Hook_Quadriko_SD.fbx', (root) => {
 			var num = 0;
 			root.traverse( function ( child ) {
+<<<<<<< HEAD
 				if ( child instanceof THREE.Mesh ) 
 				{
 					if(
@@ -373,12 +428,59 @@ function readModel() {
 				child.castShadow = true;
 				child.receiveShadow = true;
 
+=======
+				console.log(child.name);
+			// 	if ( child instanceof THREE.Mesh ) 
+			// 	{
+			// 		if(
+			// 			child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
+			// 			child.name ==="polySurface47" || child.name ==="polySurface32")
+			// 		{
+			// 			child.material = platic_mat;
+			// 		}
+			// 		else if(child.name ==="polySurface46" || child.name ==="polySurface48" ||
+			// 				child.name ==="polySurface49" || child.name ==="polySurface50" )
+			// 		{
+			// 			child.material = leather_mat;
+			// 		}
+			// 		else if(
+			// 				child.name ==="polySurface44" || child.name ==="polySurface45" ||
+			// 				child.name ==="polySurface42" || child.name ==="polySurface43" ||
+			// 				child.name ==="polySurface51" || child.name === "polySurface16" ||
+			// 				child.name ==="polySurface27" ||  child.name ==="polySurface28" ||
+			// 				child.name ==="polySurface29" ||child.name ==="polySurface30" || 
+			// 				child.name ==="polySurface31")
+			// 		{
+			// 			child.material = wood_mat;
+			// 		}
+			// 	else if(
+			// 		child.name ==="polySurface19" || child.name ==="polySurface24" ||
+			// 		child.name ==="polySurface36" || child.name ==="polySurface37" ||
+			// 		child.name ==="polySurface38" || child.name ==="polySurface39" ||
+			// 		child.name ==="polySurface40" || child.name ==="polySurface41" ||
+			// 		child.name ==="polySurface34" || child.name ==="polySurface35" ||
+			// 		child.name ==="polySurface25" ||child.name ==="polySurface20"  ||
+			// 		child.name ==="polySurface26" || child.name ==="polySurface27" ||
+			// 		child.name ==="polySurface22" || child.name ==="polySurface23")
+			// 		{
+			// 			child.material = metal_mat;
+			// 			// child.visible = false;
+			// 		}
+			// 	}
+			// 	else
+			// 	{
+			// 		child.material = metal_mat;
+			// 	}
+>>>>>>> f82259863b4b2625315a9a1c8731b51d1ed0448b
 			} );
 			scene.add(root);
 			console.log("loaded FBX")
 			fitCameraToObject(camera, root, 15);
 		});
-}
+
+
+
+	}
 
 function fitCameraToObject( camera, object, offset ) {
 
