@@ -41,7 +41,7 @@ container.appendChild( renderer.domElement );
 renderer.setClearColor( 0x000000, 0);
 
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1;
+renderer.toneMappingExposure = 4;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 var pmremGenerator = new THREE.PMREMGenerator( renderer );
@@ -160,29 +160,6 @@ var platic_mat = new THREE.MeshPhysicalMaterial( {  map: map_text_platic,  norma
 //#endregion
 
 
-//Car paint
-// car paint
-
-var normalMap3 = new THREE.CanvasTexture( new FlakesTexture() );
-normalMap3.wrapS = THREE.RepeatWrapping;
-normalMap3.wrapT = THREE.RepeatWrapping;
-normalMap3.repeat.x = 10;
-normalMap3.repeat.y = 6;
-normalMap3.anisotropy = 16;
-
-var carMaterial = new THREE.MeshPhysicalMaterial( {
-	clearcoat: 1.0,
-	clearcoatRoughness: 0.1,
-	metalness: 0.9,
-	roughness: 0.5,
-	color: 0xff0000,
-	// normalMap: normalMap3,
-	normalScale: new THREE.Vector2( 5, 5 )
-} );
-
-
-// var carMaterial = new THREE.MeshPhysicalMaterial();
-
 //#endregion
 
 //#region Floor Plan
@@ -217,7 +194,7 @@ scene.add( spot );
 
 
 // #region Light
-var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 ); 
+var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.1 ); 
 scene.add(hemiLight);
 
 //#endregion
@@ -341,9 +318,7 @@ function readModel() {
 			{
 				if ( child instanceof THREE.Mesh ) 
 				{
-					// console.log(child.name);
-					// child.material  = carMaterial;
-					child.material  = carMaterial;
+
 				}
 			});
 			scene.add(root);
@@ -354,26 +329,16 @@ function readModel() {
 function loadModelWithHDR() {
 	new HDRCubeTextureLoader()
 	.setDataType( THREE.UnsignedByteType )
-	.setPath( './Libs/ThreeJs/textures/cube/pisaHDR/' )
-	.load( [ 'px.hdr', 'nx.hdr', 'py.hdr', 'ny.hdr', 'pz.hdr', 'nz.hdr' ],
+	.setPath( './Libs/ThreeJs/textures/equirectangular/' )
+	.load( [ 'venice_sunset_1k.hdr' ],
 		function ( hdrCubeMap ) {
-
 			var hdrCubeRenderTarget = pmremGenerator.fromCubemap( hdrCubeMap );
 			hdrCubeMap.dispose();
 			pmremGenerator.dispose();
-
-			var geometry = new THREE.SphereBufferGeometry( 80, 64, 32 );
-
-			var textureLoader = new THREE.TextureLoader();
-
 			scene.background = hdrCubeRenderTarget.texture;
 			scene.environment = hdrCubeRenderTarget.texture;
-
 		}
-
 	);
-
-
 }	
 
 
