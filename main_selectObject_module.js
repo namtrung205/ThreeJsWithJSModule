@@ -16,6 +16,10 @@ import * as dat from './Libs/ThreeJs/jsm/libs/dat.gui.module.js';
 //Shader
 import { FXAAShader } from './Libs/ThreeJs/jsm/shaders/FXAAShader.js';
 
+//Textture
+import { FlakesTexture } from './Libs/ThreeJs/jsm/textures/FlakesTexture.js';
+
+import { HDRCubeTextureLoader } from './Libs/ThreeJs/jsm/loaders/HDRCubeTextureLoader.js';
 //Control
 // import { IndoorControls } from './Libs/ThreeJs/jsm/controls/IndoorControls.js';
 import {OrbitControls} from './Libs/ThreeJs/jsm/controls/OrbitControls.js'
@@ -39,6 +43,9 @@ renderer.setClearColor( 0x000000, 0);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1;
 renderer.outputEncoding = THREE.sRGBEncoding;
+
+var pmremGenerator = new THREE.PMREMGenerator( renderer );
+pmremGenerator.compileEquirectangularShader();
 
 var controls = new OrbitControls( camera, renderer.domElement ) ;
 // controls.enableZoom = false;
@@ -152,6 +159,30 @@ var platic_mat = new THREE.MeshPhysicalMaterial( {  map: map_text_platic,  norma
 
 //#endregion
 
+
+//Car paint
+// car paint
+
+var normalMap3 = new THREE.CanvasTexture( new FlakesTexture() );
+normalMap3.wrapS = THREE.RepeatWrapping;
+normalMap3.wrapT = THREE.RepeatWrapping;
+normalMap3.repeat.x = 10;
+normalMap3.repeat.y = 6;
+normalMap3.anisotropy = 16;
+
+var carMaterial = new THREE.MeshPhysicalMaterial( {
+	clearcoat: 1.0,
+	clearcoatRoughness: 0.1,
+	metalness: 0.9,
+	roughness: 0.5,
+	color: 0xff0000,
+	// normalMap: normalMap3,
+	normalScale: new THREE.Vector2( 5, 5 )
+} );
+
+
+// var carMaterial = new THREE.MeshPhysicalMaterial();
+
 //#endregion
 
 //#region Floor Plan
@@ -185,19 +216,8 @@ scene.add( spot );
 //#endregion
 
 
-//#region Light
-// var pointLight_01 = new THREE.PointLight( 0xffffff, 1 );
-// pointLight_01.position.y = 20;
-// scene.add( pointLight_01 );
-
-// var pointLight_02 = new THREE.PointLight( 0xffffff, 1 );
-// pointLight_02.position.x = 30;
-// pointLight_02.position.y = 30;
-// pointLight_02.position.z = 7;
-// scene.add( pointLight_02 );
-
-
-var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.8 ); 
+// #region Light
+var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 ); 
 scene.add(hemiLight);
 
 //#endregion
@@ -306,69 +326,56 @@ function init() {
 	outlinePass.visibleEdgeColor.set( "#ffffff" );
 	outlinePass.hiddenEdgeColor.set( "#000000" );
 	composer.addPass( outlinePass );
+
+	loadModelWithHDR();
 	readModel();
 }
 
 function readModel() {
-		//FBXloader
-		const fbxLoader = new FBXLoader();
-		// fbxLoader.load('./models/fbx/Chair/source/chair.fbx', (root) => {
-		// 	var num = 0;
-		// 	root.traverse( function ( child ) {
-		// 		if ( child instanceof THREE.Mesh ) 
-		// 		{
-		// 			if(
-		// 				child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
-		// 				child.name ==="polySurface47" || child.name ==="polySurface32")
-		// 			{
-		// 				child.material = platic_mat;
-		// 			}
-		// 			else if(child.name ==="polySurface46" || child.name ==="polySurface48" ||
-		// 					child.name ==="polySurface49" || child.name ==="polySurface50" )
-		// 			{
-		// 				child.material = leather_mat;
-		// 			}
-		// 			else if(
-		// 					child.name ==="polySurface44" || child.name ==="polySurface45" ||
-		// 					child.name ==="polySurface42" || child.name ==="polySurface43" ||
-		// 					child.name ==="polySurface51" || child.name === "polySurface16" ||
-		// 					child.name ==="polySurface27" ||  child.name ==="polySurface28" ||
-		// 					child.name ==="polySurface29" ||child.name ==="polySurface30" || 
-		// 					child.name ==="polySurface31")
-		// 			{
-		// 				child.material = wood_mat;
-		// 			}
-		// 		else if(
-		// 			child.name ==="polySurface19" || child.name ==="polySurface24" ||
-		// 			child.name ==="polySurface36" || child.name ==="polySurface37" ||
-		// 			child.name ==="polySurface38" || child.name ==="polySurface39" ||
-		// 			child.name ==="polySurface40" || child.name ==="polySurface41" ||
-		// 			child.name ==="polySurface34" || child.name ==="polySurface35" ||
-		// 			child.name ==="polySurface25" ||child.name ==="polySurface20"  ||
-		// 			child.name ==="polySurface26" || child.name ==="polySurface27" ||
-		// 			child.name ==="polySurface22" || child.name ==="polySurface23")
-		// 			{
-		// 				child.material = metal_mat;
-		// 				// child.visible = false;
-		// 			}
-		// 		}
-		// 		else
-		// 		{
-		// 			child.material = metal_mat;
-		// 		}
-		// 	} );
-		// 	scene.add(root);
-		// 	console.log("loaded FBX")
-		// 	fitCameraToObject(camera, root, 15);
-		// });
-
 		const gltfLoader = new GLTFLoader();
 		const url = './models/gltf/corvette_stingray/scene.gltf';
-		gltfLoader.load(url, (gltf) => {
+		gltfLoader.load(url, (gltf) => 
+		{
 			const root = gltf.scene;
+			root.traverse( function ( child ) 
+			{
+				if ( child instanceof THREE.Mesh ) 
+				{
+					// console.log(child.name);
+					// child.material  = carMaterial;
+					child.material  = carMaterial;
+				}
+			});
 			scene.add(root);
 		});
 	}
+
+
+function loadModelWithHDR() {
+	new HDRCubeTextureLoader()
+	.setDataType( THREE.UnsignedByteType )
+	.setPath( './Libs/ThreeJs/textures/cube/pisaHDR/' )
+	.load( [ 'px.hdr', 'nx.hdr', 'py.hdr', 'ny.hdr', 'pz.hdr', 'nz.hdr' ],
+		function ( hdrCubeMap ) {
+
+			var hdrCubeRenderTarget = pmremGenerator.fromCubemap( hdrCubeMap );
+			hdrCubeMap.dispose();
+			pmremGenerator.dispose();
+
+			var geometry = new THREE.SphereBufferGeometry( 80, 64, 32 );
+
+			var textureLoader = new THREE.TextureLoader();
+
+			scene.background = hdrCubeRenderTarget.texture;
+			scene.environment = hdrCubeRenderTarget.texture;
+
+		}
+
+	);
+
+
+}	
+
 
 function fitCameraToObject( camera, object, offset ) {
 
