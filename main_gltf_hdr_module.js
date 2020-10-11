@@ -6,7 +6,7 @@ import * as THREE from './Libs/ThreeJs/builds/three.module.js';
 //Loader
 import { FBXLoader } from './Libs/ThreeJs/jsm/loaders/FBXLoader.js';      
 import {GLTFLoader} from './Libs/ThreeJs/jsm/loaders/GLTFLoader.js'
-
+import { RGBELoader } from './Libs/ThreeJs/jsm/loaders/RGBELoader.js';
 // Composer
 import { EffectComposer } from './Libs/ThreeJs/jsm/postprocessing/EffectComposer.js';
 import { OutlinePass } from './Libs/ThreeJs/jsm/postprocessing/OutlinePass.js';
@@ -27,7 +27,7 @@ import {OrbitControls} from './Libs/ThreeJs/jsm/controls/OrbitControls.js'
 //#endregion
 
 
-//#region  main func
+//#region  setup Scene
 var container = document.getElementById( 'container' );
 
 var scene = new THREE.Scene();
@@ -42,20 +42,13 @@ container.appendChild( renderer.domElement );
 renderer.setClearColor( 0x000000, 0);
 
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 4;
+renderer.toneMappingExposure = 3;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 var pmremGenerator = new THREE.PMREMGenerator( renderer );
 pmremGenerator.compileEquirectangularShader();
 
 var controls = new OrbitControls( camera, renderer.domElement ) ;
-// controls.enableZoom = false;
-// // controls.enablePan = false;
-// controls.minPolarAngle = Math.PI/10;
-// controls.maxPolarAngle = Math.PI/2.5;
-
-var pointClicked;
-var validClick = false;
 
 var resolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 
@@ -134,33 +127,6 @@ var spot_mat = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transpar
 //#endregion
 
 
-//#region Chair Material
-
-//Leather
-var map_text_leather = tex_loader.load( './models/fbx/Chair/textures/chair_leather_BaseColor.jpg' );
-var map_normal_leather = tex_loader.load( './models/fbx/Chair/textures/chair_leather_Normal.jpg' );
-//metal
-var map_text_metal = tex_loader.load( './models/fbx/Chair/textures/chair_metal_BaseColor.jpg' );
-var map_metalness_metal = tex_loader.load( './models/fbx/Chair/textures/chair_metal_Roughness.jpg' );
-var map_rounghness_metal = tex_loader.load( './models/fbx/Chair/textures/chair_metal_Roughness.jpg' );
-//Wood
-var map_text_wood = tex_loader.load( './models/fbx/Chair/textures/chair_wood_BaseColor.jpg' );
-var map_normal_wood= tex_loader.load( './models/fbx/Chair/textures/chair_wood_Normal.jpg' );
-var map_rounghness_wood = tex_loader.load( './models/fbx/Chair/textures/chair_wood_Roughness.jpg' );
-//platic
-var map_text_platic = tex_loader.load( './models/fbx/Chair/textures/chair_plastic_BaseColor.jpg' );
-var map_normal_platic = tex_loader.load( './models/fbx/Chair/textures/chair_plastic_Normal.jpg' );
-var map_rounghness_platic = tex_loader.load( './models/fbx/Chair/textures/chair_plastic_Roughness.jpg' );
-
-//Material
-var leather_mat = new THREE.MeshPhysicalMaterial( { map: map_text_leather,  normalMap: map_normal_leather } );
-var metal_mat = new THREE.MeshPhysicalMaterial( { map: map_text_metal,  metalnessMap:map_metalness_metal, roughnessMap:map_rounghness_metal } );
-var wood_mat = new THREE.MeshPhysicalMaterial( { map: map_text_wood,  normalMap:map_normal_wood, roughnessMap:map_rounghness_wood } );
-var platic_mat = new THREE.MeshPhysicalMaterial( {  map: map_text_platic,  normalMap:map_normal_platic, roughnessMap:map_rounghness_platic} );
-
-//#endregion
-
-
 //#endregion
 
 //#region Floor Plan
@@ -200,22 +166,6 @@ scene.add(hemiLight);
 
 //#endregion
 
-
-
-//#region DAT GUI
-//Para for GUI
-var Params = function() {
-	this.lineWidth = 0.001;
-	this.update = function() {
-		// clearLines();
-		// createLines();
-	}
-};
-
-var params = new Params();
-var gui = new dat.GUI();
-
-//#endregion
 
 //Select by mouse
 var raycaster = new THREE.Raycaster();
@@ -286,12 +236,8 @@ window.addEventListener('mousemove', onMouseMove, true);
 init()
 render();
 
-function init() {
+async function init() {
 	composer = new EffectComposer( renderer );
-
-	// var copyPass = new ShaderPass( THREE.CopyShader );
-	// copyPass.renderToScreen = true;
-	// composer.addPass( copyPass );
 
 	var renderPass = new RenderPass( scene, camera );
 	composer.addPass( renderPass );
@@ -305,8 +251,8 @@ function init() {
 	outlinePass.hiddenEdgeColor.set( "#000000" );
 	composer.addPass( outlinePass );
 
-	loadModelWithHDR();
 	readModel();
+	loadModelWithHDR();
 }
 
 function readModel() {
@@ -317,29 +263,39 @@ function readModel() {
 			const root = gltf.scene;
 			root.traverse( function ( child ) 
 			{
-				if ( child instanceof THREE.Mesh ) 
-				{
 
-				}
 			});
 			scene.add(root);
 		});
 	}
 
 
-function loadModelWithHDR() {
-	new HDRCubeTextureLoader()
-	.setDataType( THREE.UnsignedByteType )
-	.setPath( './Libs/ThreeJs/textures/equirectangular/' )
-	.load( [ 'venice_sunset_1k.hdr' ],
-		function ( hdrCubeMap ) {
-			var hdrCubeRenderTarget = pmremGenerator.fromCubemap( hdrCubeMap );
-			hdrCubeMap.dispose();
-			pmremGenerator.dispose();
-			scene.background = hdrCubeRenderTarget.texture;
-			scene.environment = hdrCubeRenderTarget.texture;
-		}
-	);
+async function loadModelWithHDR() {
+	var pmremGenerator = new THREE.PMREMGenerator( renderer );
+	pmremGenerator.compileEquirectangularShader();
+
+	var rgbeLoader = new RGBELoader()
+		.setDataType( THREE.UnsignedByteType )
+		.setPath( './Libs/ThreeJs/textures/equirectangular/' );
+
+	var gltfLoader = new GLTFLoader().setPath( 'models/gltf/corvette_stingray/' );
+
+	var [ texture, gltf ] = await Promise.all( [
+		rgbeLoader.loadAsync( 'venice_sunset_1k.hdr' ),
+		gltfLoader.loadAsync( 'scene.gltf' ),
+	] );
+	// environment
+
+	var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+
+	scene.background = envMap;
+	scene.environment = envMap;
+
+	texture.dispose();
+	pmremGenerator.dispose();
+
+	// model
+	scene.add(gltf.scene)
 }	
 
 
