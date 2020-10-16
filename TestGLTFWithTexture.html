@@ -61,14 +61,15 @@
 
 				scene = new THREE.Scene();
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
-				camera.position.set( - 10, 0.6, 8 );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.025, 20000000 );
+				camera.position.set( - 30, 30, 40 );
 
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.addEventListener( 'change', render ); // use if there is no animation loop
-				controls.enableZoom = false;
-				controls.enablePan = false;
-				controls.target.set( 0, 0, - 0.2 );
+				controls.enableZoom = true;
+				controls.enablePan = true;
+				controls.target.set( 0, 0, - 2 );
 				controls.update();
 
 				var pmremGenerator = new THREE.PMREMGenerator( renderer );
@@ -78,7 +79,7 @@
 					.setDataType( THREE.UnsignedByteType )
 					.setPath( './Libs/ThreeJs/textures/equirectangular/' );
 
-				var gltfLoader = new GLTFLoader().setPath( 'models/gltf/corvette_stingray/' );
+				var gltfLoader = new GLTFLoader().setPath( 'models/gltf/chair/' );
 
 				var [ texture, gltf ] = await Promise.all( [
 					rgbeLoader.loadAsync( 'venice_sunset_1k.hdr' ),
@@ -89,7 +90,7 @@
 
 				var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 
-				scene.background = envMap;
+				// scene.background = envMap;
 				scene.environment = envMap;
 
 				texture.dispose();

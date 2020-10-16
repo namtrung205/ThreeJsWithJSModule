@@ -42,7 +42,7 @@ container.appendChild( renderer.domElement );
 renderer.setClearColor( 0x000000, 0);
 
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 3;
+renderer.toneMappingExposure = 2;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 var pmremGenerator = new THREE.PMREMGenerator( renderer );
@@ -251,13 +251,13 @@ async function init() {
 	outlinePass.hiddenEdgeColor.set( "#000000" );
 	composer.addPass( outlinePass );
 
-	readModel();
+	// readModel();
 	loadModelWithHDR();
 }
 
 function readModel() {
 		const gltfLoader = new GLTFLoader();
-		const url = './models/gltf/corvette_stingray/scene.gltf';
+		const url = './models/gltf/chair/scene.gltf';
 		gltfLoader.load(url, (gltf) => 
 		{
 			const root = gltf.scene;
@@ -278,7 +278,7 @@ async function loadModelWithHDR() {
 		.setDataType( THREE.UnsignedByteType )
 		.setPath( './Libs/ThreeJs/textures/equirectangular/' );
 
-	var gltfLoader = new GLTFLoader().setPath( 'models/gltf/corvette_stingray/' );
+	var gltfLoader = new GLTFLoader().setPath( 'models/gltf/chair/' );
 
 	var [ texture, gltf ] = await Promise.all( [
 		rgbeLoader.loadAsync( 'venice_sunset_1k.hdr' ),
@@ -288,13 +288,14 @@ async function loadModelWithHDR() {
 
 	var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 
-	scene.background = envMap;
+	// scene.background = envMap; //Not set bG
 	scene.environment = envMap;
 
 	texture.dispose();
 	pmremGenerator.dispose();
 
 	// model
+	gltf.scene.scale.set(0.02,0.02,0.02);
 	scene.add(gltf.scene)
 }	
 
