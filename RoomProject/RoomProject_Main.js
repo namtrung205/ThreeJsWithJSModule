@@ -35,18 +35,16 @@ scene.background = new THREE.Color( 0x808080 );
 var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 0.1, 1000000 );
 camera.position.set( 0, 0, 50 );
 var frustumSize = 20;
-var renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true });
+var renderer = new THREE.WebGLRenderer( { antialias: true });
 renderer.shadowMap.enabled = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
 container.appendChild( renderer.domElement );
 renderer.setClearColor( 0x000000, 0);
 
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMapping = THREE.ReinhardToneMapping;
 renderer.toneMappingExposure = 1;
 renderer.outputEncoding = THREE.sRGBEncoding;
-var pmremGenerator = new THREE.PMREMGenerator( renderer );
-pmremGenerator.compileEquirectangularShader();
 
 //Create Control
 var controls = new IndoorControls( camera, renderer.domElement, scene ) ;
@@ -59,12 +57,91 @@ var mouse = new THREE.Vector2();
 var selectedObjects = [];
 var composer, effectFXAA, outlinePass;
 
+var envMap;
+
 
 //#region Material
 //Texture Loader
 var tex_loader = new THREE.TextureLoader();
+
+
+//Test Material
+var textureLoader = new THREE.TextureLoader();
+var normalMap2 = textureLoader.load( "../Libs/ThreeJs/textures/water/Water_1_M_Normal.jpg" );
+var clearcoatNormaMap = textureLoader.load( "../Libs/ThreeJs/textures/pbr/Scratched_gold/Scratched_gold_01_1K_Normal.png" );
+var geometry = new THREE.SphereBufferGeometry( 30, 32, 32 );
+var material = new THREE.MeshPhysicalMaterial( {
+	clearcoat: 1.0,
+	metalness: 0.2,
+	// color: 0xff0000,
+	normalMap: normalMap2,
+	normalScale: new THREE.Vector2( 0.15, 0.15 ),
+	clearcoatNormalMap: clearcoatNormaMap,
+
+	// y scale is negated to compensate for normal map handedness.
+	clearcoatNormalScale: new THREE.Vector2( 2.0, - 2.0 )
+} );
+
+
 //#region Floor Mat
 
+//GlassMat
+var glass_mat = new THREE.MeshPhysicalMaterial( {
+	color: 0x314d,
+	metalness: 0,
+	roughness: 0,
+	// alphaMap: texture,
+	alphaTest: 0.5,
+	envMap: envMap,
+	envMapIntensity: 1,
+	depthWrite: false,
+	transmission: 0.5, // use material.transmission for glass materials
+	opacity: 1,                        // set material.opacity to 1 when material.transmission is non-zero
+	transparent: true
+} );
+
+
+
+
+//Map floor 1 ThreeJsWithJSModule\models\fbx\house\narrow-floorboards1-albedo.png
+var map_text_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-albedo.png' );
+map_text_floor.wrapS = THREE.RepeatWrapping;
+map_text_floor.wrapT = THREE.RepeatWrapping;
+
+var map_normal_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-normal-dx.png' );
+map_normal_floor.wrapS = THREE.RepeatWrapping;
+map_normal_floor.wrapT = THREE.RepeatWrapping;
+
+
+var map_roughness_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-roughness.png');
+map_roughness_floor.wrapS = THREE.RepeatWrapping;
+map_roughness_floor.wrapT = THREE.RepeatWrapping;
+
+
+var map_displacementMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-height.png');
+map_displacementMap_floor.wrapS = THREE.RepeatWrapping;
+map_displacementMap_floor.wrapT = THREE.RepeatWrapping;
+
+
+
+var map_aoMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-ao.png');
+map_aoMap_floor.wrapS = THREE.RepeatWrapping;
+map_aoMap_floor.wrapT = THREE.RepeatWrapping;
+
+
+var floor_mat = new THREE.MeshPhysicalMaterial( { 
+	map: map_text_floor,
+	normalMap: map_normal_floor,
+	roughnessMap:map_roughness_floor,
+	displacementMap: map_displacementMap_floor ,
+	aoMap:map_aoMap_floor,
+	clearcoat: 0.3,
+	metalness: 0.0,
+	normalScale: new THREE.Vector2( 0.15, 0.15 ),
+	roughness : 0.1,
+	aoMapIntensity : 0.2,
+	normalScale : new THREE.Vector2(0.5, 0.5),
+	side: THREE.DoubleSide} );
 
 //#endregion
 
@@ -102,18 +179,6 @@ var platic_mat = new THREE.MeshPhysicalMaterial( {  map: map_text_platic,  norma
 
 //#endregion
 
-//#region Floor Plan
-var floor_geometry = new THREE.PlaneGeometry( 150, 150, 32 );
-var floor_plane = new THREE.Mesh( floor_geometry, spot_mat );
-
-floor_plane.position.set( 30, 1, 0 );
-
-var quaternion = new THREE.Quaternion();
-quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0), Math.PI / 2 );
-floor_plane.applyQuaternion(quaternion)
-floor_plane.name = "main_floor"
-scene.add( floor_plane );
-//#endregion
 
 //#region Spot Geo
 var spot_geometry = new THREE.CircleGeometry( 2, 32 );
@@ -135,10 +200,14 @@ scene.add( spot );
 //#endregion
 
 //#region Light
-var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 ); 
-scene.add(hemiLight);
 
-var pointLight_01 = new THREE.PointLight( 0xffffff, 0.2 );
+// var aoLight = new THREE.AmbientLight( 0x404040 ); // soft white light
+// scene.add( aoLight );
+
+// var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 ); 
+// scene.add(hemiLight);
+
+var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
 pointLight_01.position.y = 20;
 scene.add( pointLight_01 );
 
@@ -164,7 +233,7 @@ function checkIntersection()
 		//Check if plan, get point to move
 		if(selectedObject)
 		{
-			if(selectedObject.name === "main_floor")
+			if(selectedObject.name === "FloorSurface")
 			{
 				outlinePass.selectedObjects = [];
 				spot.visible = false;
@@ -219,13 +288,13 @@ function init() {
 	outlinePass.visibleEdgeColor.set( "#ffffff" );
 	outlinePass.hiddenEdgeColor.set( "#000000" );
 	composer.addPass( outlinePass );
-	readModel();
 
 	loadModelWithHDR();
+	readModel();
 
 
 	// Add Controls Attributer
-	controls.ground.push( floor_plane );
+	// controls.ground.push( floor_plane );
 	controls.addEventListener( 'move', function ( event ) 
 	{
 
@@ -247,9 +316,6 @@ function init() {
 			controls.enabled_move = true;
 		}
 	} );
-
-
-	
 }
 
 async function loadModelWithHDR() {
@@ -259,34 +325,22 @@ async function loadModelWithHDR() {
 	var rgbeLoader = new RGBELoader()
 		.setDataType( THREE.UnsignedByteType )
 		.setPath( '../Libs/ThreeJs/textures/equirectangular/' );
-
-	// var gltfLoader = new GLTFLoader().setPath( '../models/gltf/chair/' );
-
-	var [ texture, gltf ] = await Promise.all( [
-		rgbeLoader.loadAsync( 'venice_sunset_1k.hdr' ),
-		// gltfLoader.loadAsync( 'scene.gltf' ),
-	] );
+	var [ texture] = await Promise.all( [rgbeLoader.loadAsync( 'royal_esplanade_1k.hdr' )] );
 	// environment
-
-	var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-
+	envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 	// scene.background = envMap; //Not set bG
 	scene.environment = envMap;
-
 	texture.dispose();
 	pmremGenerator.dispose();
-
-	// // model
-	// gltf.scene.scale.set(0.02,0.02,0.02);
-	// scene.add(gltf.scene)
 }	
 
 
 function readModel() {
 		// //FBXloader
 		const fbxLoader = new FBXLoader();
+
+		//Load chair
 		fbxLoader.load('../models/fbx/Chair/source/chair.fbx', (root) => {
-			var num = 0;
 			root.traverse( function ( child ) {
 				if ( child instanceof THREE.Mesh ) 
 				{
@@ -331,47 +385,32 @@ function readModel() {
 				}
 			} );
 			scene.add(root);
-			root.position.set(20,0,0)
+			root.position.set(30,4,-45)
 			fitCameraToObject(camera, root, 15);
 			console.log("loaded Chair")
 		});
 	
-			//FBXloader
-			fbxLoader.load('../models/fbx/House/HouseModel.fbx', (root) => {
-				var num = 0;
-				root.traverse( function ( child ) {
-					console.log(child.name);
-					if(child.name === "FloorSurface")
-					{
-						// child.material = floor_mat;
-						//Map floor 1
-						var map_text_floor = tex_loader.load( '../models/fbx/house/Texture/narrow-floorboards1-ue/narrow-floorboards1-albedo.png' );
-
-						var map_normal_floor = tex_loader.load( '../models/fbx/house/Texture/narrow-floorboards1-ue/narrow-floorboards1-normal-dx.png' );
-
-						var map_roughness_floor = tex_loader.load( '../models/fbx/house/Texture/narrow-floorboards1-ue/narrow-floorboards1-roughness.png');
-
-						var map_displacementMap_floor = tex_loader.load( '../models/fbx/house/Texture/narrow-floorboards1-ue/narrow-floorboards1-height.png');
-
-						var map_aoMap_floor = tex_loader.load( '../models/fbx/house/Texture/narrow-floorboards1-ue/narrow-floorboards1-ao.png');
-
-						var floor_surface_mat = new THREE.MeshPhongMaterial( { map: map_text_floor,
-							side: THREE.DoubleSide} );;
-
-						child.material = floor_surface_mat;
-
-						console.log(child.material);
-					}
-				} );
-				root.scale.set(0.5,0.5,0.5);
-				root.position.set(30,0,30)
-				// root.rotateOnAxis(new THREE.Vector3(1,0,0), -3.14/2);
-				scene.add(root);
-				console.log("loaded House")
-				// fitCameraToObject(camera, root, 15);
-			});
-		
-		
+		//Load House
+		fbxLoader.load('../models/fbx/House/HouseModel.fbx', (root) => {
+			root.traverse( function ( child ) {
+				console.log(child.name);
+				if(child.name === "FloorSurface")
+				{
+					child.material = floor_mat;
+					controls.ground.push( child );
+				}
+				else if(child.name === "GlassDoor")
+				{
+					child.material = glass_mat;
+				}
+			} );
+			root.scale.set(0.5,0.5,0.5);
+			root.position.set(30,0,30)
+			scene.add(root);
+			console.log("loaded House")
+			// fitCameraToObject(camera, root, 15);
+		});
+	
 	}
 
 function fitCameraToObject( camera, object, offset ) {
