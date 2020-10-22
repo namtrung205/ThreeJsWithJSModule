@@ -14,6 +14,10 @@ import { ShaderPass } from '../Libs/ThreeJs/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from '../Libs/ThreeJs/jsm/postprocessing/RenderPass.js';
 import * as dat from '../Libs/ThreeJs/jsm/libs/dat.gui.module.js';
 
+//Bloom
+import { UnrealBloomPass } from '../Libs/ThreeJs/jsm/postprocessing/UnrealBloomPass.js';
+import { SAOPass } from '../Libs/ThreeJs/jsm/postprocessing/SAOPass.js';
+
 //Hdri
 import { RGBELoader } from '../Libs/ThreeJs/jsm/loaders/RGBELoader.js';
 
@@ -35,14 +39,14 @@ scene.background = new THREE.Color( 0x808080 );
 var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 0.1, 1000000 );
 camera.position.set( 0, 0, 50 );
 var frustumSize = 20;
-var renderer = new THREE.WebGLRenderer( { antialias: true });
+var renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true });
 renderer.shadowMap.enabled = true;
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
 container.appendChild( renderer.domElement );
 renderer.setClearColor( 0x000000, 0);
 
-renderer.toneMapping = THREE.ReinhardToneMapping;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
@@ -55,7 +59,7 @@ var resolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 var selectedObjects = [];
-var composer, effectFXAA, outlinePass;
+var composer, effectFXAA, outlinePass, saoPass, bloomPass;
 
 var envMap;
 
@@ -93,15 +97,35 @@ var glass_mat = new THREE.MeshPhysicalMaterial( {
 	// alphaMap: texture,
 	alphaTest: 0.5,
 	envMap: envMap,
-	envMapIntensity: 1,
+	envMapIntensity: 0.25,
 	depthWrite: false,
 	transmission: 0.5, // use material.transmission for glass materials
-	opacity: 1,                        // set material.opacity to 1 when material.transmission is non-zero
+	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
 	transparent: true
 } );
 
+//Wall Material
+var wall_mat = new THREE.MeshPhysicalMaterial( {
+	color: 0x69e39b,
+	metalness: 0,
+	roughness: 0.3,
+	// alphaMap: texture,
+	alphaTest: 0.5,
+	envMap: envMap,
+	envMapIntensity: 0.2,
+	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
+} );
 
-
+var side_mat = new THREE.MeshPhysicalMaterial( {
+	color: 0xa20101,
+	metalness: 0,
+	roughness: 0.1,
+	// alphaMap: texture,
+	alphaTest: 0.6,
+	envMap: envMap,
+	envMapIntensity: 0.3,
+	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
+} );
 
 //Map floor 1 ThreeJsWithJSModule\models\fbx\house\narrow-floorboards1-albedo.png
 var map_text_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-albedo.png' );
@@ -138,8 +162,9 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 	clearcoat: 0.3,
 	metalness: 0.0,
 	normalScale: new THREE.Vector2( 0.15, 0.15 ),
-	roughness : 0.1,
+	roughness : 0.25,
 	aoMapIntensity : 0.2,
+	envMapIntensity: 0.15,
 	normalScale : new THREE.Vector2(0.5, 0.5),
 	side: THREE.DoubleSide} );
 
@@ -204,11 +229,11 @@ scene.add( spot );
 // var aoLight = new THREE.AmbientLight( 0x404040 ); // soft white light
 // scene.add( aoLight );
 
-// var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.5 ); 
+// var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 ); 
 // scene.add(hemiLight);
 
-var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
-pointLight_01.position.y = 20;
+var pointLight_01 = new THREE.PointLight( 0xffffff, 1);
+pointLight_01.position.y = 30;
 scene.add( pointLight_01 );
 
 //#endregion
@@ -275,6 +300,10 @@ init()
 render();
 
 function init() {
+
+	loadModelWithHDR();
+	readModel();
+
 	composer = new EffectComposer( renderer );
 
 	var renderPass = new RenderPass( scene, camera );
@@ -289,31 +318,49 @@ function init() {
 	outlinePass.hiddenEdgeColor.set( "#000000" );
 	composer.addPass( outlinePass );
 
-	loadModelWithHDR();
-	readModel();
+	bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 0.2, 0, 0.2 );
+
+	composer.addPass( bloomPass );
+
+	// composer.addPass( saoPass );
+
+
+
 
 
 	// Add Controls Attributer
 	// controls.ground.push( floor_plane );
 	controls.addEventListener( 'move', function ( event ) 
 	{
-
-		// console.log(controls.ground);
+		console.log(controls.ground);
 		let intersect = event.intersect;
 		let normal = intersect.face.normal;
 
-		if ( normal.z !== 1) 
+		// console.log(intersect);
+
+		if(intersect.object.name === "FloorSurface")
+		{
+			if ( normal.z !== 1) 
+			{
+				spot.visible = false;
+				controls.enabled_move = false;
+			} else {
+				spot.visible = true;
+				// spot.position.set( 0, 0, 0 );
+				console.log(intersect.point );
+				console.log(spot.position );
+
+				// spot.position.copy( intersect.point );
+				spot.position.set( intersect.point );
+				spot.position.addScaledVector( normal, 0.001 );
+	
+				controls.enabled_move = true;
+			}
+		}
+		else
 		{
 			spot.visible = false;
 			controls.enabled_move = false;
-		} else {
-
-			spot.position.set( 0, 0, 0 );
-			spot.position.copy( intersect.point );
-			spot.position.addScaledVector( normal, 0.001 );
-
-			spot.visible = true;
-			controls.enabled_move = true;
 		}
 	} );
 }
@@ -402,6 +449,14 @@ function readModel() {
 				else if(child.name === "GlassDoor")
 				{
 					child.material = glass_mat;
+				}
+				else if(child.name === "wall")
+				{
+					child.material = wall_mat;
+				}
+				else if(child.name === "Side")
+				{
+					child.material = side_mat;
 				}
 			} );
 			root.scale.set(0.5,0.5,0.5);
