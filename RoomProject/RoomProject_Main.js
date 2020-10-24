@@ -41,6 +41,7 @@ camera.position.set( 0, 0, 50 );
 var frustumSize = 20;
 var renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true });
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;		
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
 container.appendChild( renderer.domElement );
@@ -91,22 +92,16 @@ var material = new THREE.MeshPhysicalMaterial( {
 
 //GlassMat
 var glass_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0x314d,
-	metalness: 0,
-	roughness: 0,
-	// alphaMap: texture,
-	alphaTest: 0.5,
-	envMap: envMap,
-	envMapIntensity: 0.25,
-	depthWrite: false,
-	transmission: 0.5, // use material.transmission for glass materials
-	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
+	color: 0xffffff,
+	roughness: 0.2,
+	// transmission: 0.5, // use material.transmission for glass materials
+	opacity: 0.1,  // set material.OPACITY to 1 when material.transmission is non-zero
 	transparent: true
 } );
 
 //Wall Material
 var wall_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0x69e39b,
+	color: 0x40ffff,
 	metalness: 0,
 	roughness: 0.3,
 	// alphaMap: texture,
@@ -162,9 +157,9 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 	clearcoat: 0.3,
 	metalness: 0.0,
 	normalScale: new THREE.Vector2( 0.15, 0.15 ),
-	roughness : 0.25,
-	aoMapIntensity : 0.2,
-	envMapIntensity: 0.15,
+	roughness : 0.7,
+	aoMapIntensity : 0.01,
+	envMapIntensity: 0.05,
 	normalScale : new THREE.Vector2(0.5, 0.5),
 	side: THREE.DoubleSide} );
 
@@ -229,12 +224,13 @@ scene.add( spot );
 // var aoLight = new THREE.AmbientLight( 0x404040 ); // soft white light
 // scene.add( aoLight );
 
+
 // var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 ); 
 // scene.add(hemiLight);
 
-var pointLight_01 = new THREE.PointLight( 0xffffff, 1);
-pointLight_01.position.y = 30;
-scene.add( pointLight_01 );
+// var pointLight_01 = new THREE.PointLight( 0xffffff, 1);
+// pointLight_01.position.y = 30;
+// scene.add( pointLight_01 );
 
 //#endregion
 
@@ -301,6 +297,31 @@ render();
 
 function init() {
 
+	// LIGHTS
+
+	var light = new THREE.DirectionalLight( 0xaabbff, 0.8 );
+	light.position.x = 0;
+	light.position.y = 100;
+	light.position.z = 0;
+    // light.castShadow = true;
+    light.shadowCameraVisible = false;
+	light.name = 'Dir. Light';
+	light.shadow.camera.near = 0.1;
+	light.shadow.camera.far = 500;
+	light.shadow.camera.right = 17;
+	light.shadow.camera.left = - 17;
+	light.shadow.camera.top	= 17;
+	light.shadow.camera.bottom = - 17;
+	light.shadow.mapSize.width = 512;
+	light.shadow.mapSize.height = 512;
+	light.shadow.radius = 4;
+	light.shadow.bias = -0.0005;
+	scene.add( light );
+
+
+
+	// MODEL
+
 	loadModelWithHDR();
 	readModel();
 
@@ -318,14 +339,11 @@ function init() {
 	outlinePass.hiddenEdgeColor.set( "#000000" );
 	composer.addPass( outlinePass );
 
-	bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 0.2, 0, 0.2 );
+	bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), -0.5, 0.1, 0.1 );
 
-	composer.addPass( bloomPass );
+	// composer.addPass( bloomPass );
 
 	// composer.addPass( saoPass );
-
-
-
 
 
 	// Add Controls Attributer
@@ -389,8 +407,10 @@ function readModel() {
 		//Load chair
 		fbxLoader.load('../models/fbx/Chair/source/chair.fbx', (root) => {
 			root.traverse( function ( child ) {
+				child.castShadow = true;
 				if ( child instanceof THREE.Mesh ) 
 				{
+					
 					if(
 						child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
 						child.name ==="polySurface47" || child.name ==="polySurface32")
@@ -440,9 +460,10 @@ function readModel() {
 		//Load House
 		fbxLoader.load('../models/fbx/House/HouseModel.fbx', (root) => {
 			root.traverse( function ( child ) {
-				console.log(child.name);
+				child.castShadow = true;
 				if(child.name === "FloorSurface")
 				{
+					child.receiveShadow = true;
 					child.material = floor_mat;
 					controls.ground.push( child );
 				}
@@ -465,7 +486,6 @@ function readModel() {
 			console.log("loaded House")
 			// fitCameraToObject(camera, root, 15);
 		});
-	
 	}
 
 function fitCameraToObject( camera, object, offset ) {

@@ -136,6 +136,7 @@ var floor_plane = new THREE.Mesh( floor_geometry, floor_mat_alternative );
 var quaternion = new THREE.Quaternion();
 quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0), Math.PI / 2 );
 floor_plane.applyQuaternion(quaternion)
+floor_plane.receiveShadow = true;
 floor_plane.name = "main_floor"
 scene.add( floor_plane );
 //#endregion
@@ -161,8 +162,8 @@ scene.add( spot );
 
 
 // #region Light
-var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.1 ); 
-scene.add(hemiLight);
+// var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.1 ); 
+// scene.add(hemiLight);
 
 //#endregion
 
@@ -237,6 +238,30 @@ init()
 render();
 
 async function init() {
+
+	
+	var light = new THREE.DirectionalLight( 0xaabbff, 0.8 );
+	light.position.x = 300;
+	light.position.y = 250;
+	light.position.z = - 500;
+    light.castShadow = true;
+    light.shadowCameraVisible = true;
+	light.name = 'Dir. Light';
+	light.shadow.camera.near = 0.1;
+	light.shadow.camera.far = 500;
+	light.shadow.camera.right = 17;
+	light.shadow.camera.left = - 17;
+	light.shadow.camera.top	= 17;
+	light.shadow.camera.bottom = - 17;
+	light.shadow.mapSize.width = 512;
+	light.shadow.mapSize.height = 512;
+	light.shadow.radius = 4;
+	light.shadow.bias = -0.0005;
+	scene.add( light );
+
+
+
+
 	composer = new EffectComposer( renderer );
 
 	var renderPass = new RenderPass( scene, camera );
@@ -251,8 +276,8 @@ async function init() {
 	outlinePass.hiddenEdgeColor.set( "#000000" );
 	composer.addPass( outlinePass );
 
-	// readModel();
-	loadModelWithHDR();
+	readModel();
+	// loadModelWithHDR();
 }
 
 function readModel() {
@@ -261,9 +286,12 @@ function readModel() {
 		gltfLoader.load(url, (gltf) => 
 		{
 			const root = gltf.scene;
+			root.scale.set(0.02,0.02,0.02);
+			root.castShadow = true;
 			root.traverse( function ( child ) 
 			{
-
+				child.castShadow = true;
+				console.log(child.material);
 			});
 			scene.add(root);
 		});
