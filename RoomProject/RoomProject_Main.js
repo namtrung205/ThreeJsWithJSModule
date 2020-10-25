@@ -18,6 +18,7 @@ import * as dat from '../Libs/ThreeJs/jsm/libs/dat.gui.module.js';
 import { UnrealBloomPass } from '../Libs/ThreeJs/jsm/postprocessing/UnrealBloomPass.js';
 import { SAOPass } from '../Libs/ThreeJs/jsm/postprocessing/SAOPass.js';
 
+import { ShadowMesh } from '../Libs/ThreeJs/jsm/objects/ShadowMesh.js';
 //Hdri
 import { RGBELoader } from '../Libs/ThreeJs/jsm/loaders/RGBELoader.js';
 
@@ -26,6 +27,7 @@ import { FXAAShader } from '../Libs/ThreeJs/jsm/shaders/FXAAShader.js';
 
 //Control
 import { IndoorControls } from '../Libs/ThreeJs/jsm/controls/IndoorControls.js';
+import { OrbitControls } from '../Libs/ThreeJs/jsm/controls/OrbitControls.js';
 
 //#endregion
 
@@ -40,19 +42,31 @@ var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeig
 camera.position.set( 0, 0, 50 );
 var frustumSize = 20;
 var renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true });
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.VSMShadowMap;		
+
 renderer.setSize( window.innerWidth, window.innerHeight );
 renderer.setPixelRatio( window.devicePixelRatio );
 container.appendChild( renderer.domElement );
 renderer.setClearColor( 0x000000, 0);
 
+
+renderer.gammaOutput = true
+renderer.gammaFactor = 2.2    
+
+//shadow
+renderer.shadowMap.enabled = true;
+// renderer.shadowMapSoft = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap	
+
+//Tone
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 //Create Control
-var controls = new IndoorControls( camera, renderer.domElement, scene ) ;
+// var controls = new IndoorControls( camera, renderer.domElement, scene ) ;
+
+var controls = new OrbitControls( camera, renderer.domElement, scene ) ;
+
 var resolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 
 //Global variable
@@ -95,7 +109,7 @@ var glass_mat = new THREE.MeshPhysicalMaterial( {
 	color: 0xffffff,
 	roughness: 0.2,
 	// transmission: 0.5, // use material.transmission for glass materials
-	opacity: 0.1,  // set material.OPACITY to 1 when material.transmission is non-zero
+	opacity: 0.6,  // set material.OPACITY to 1 when material.transmission is non-zero
 	transparent: true
 } );
 
@@ -105,14 +119,29 @@ var wall_mat = new THREE.MeshPhysicalMaterial( {
 	metalness: 0,
 	roughness: 0.3,
 	// alphaMap: texture,
+	// alphaTest: 0.5,
+	// envMap: envMap,
+	// envMapIntensity: 0.2,
+	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
+	side: THREE.DoubleSide,
+} );
+
+//Wall Material
+var roof_mat = new THREE.MeshPhysicalMaterial( {
+	color: 0x40ffff,
+	metalness: 0,
+	roughness: 0.3,
+	// alphaMap: texture,
 	alphaTest: 0.5,
 	envMap: envMap,
 	envMapIntensity: 0.2,
 	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
+	side: THREE.DoubleSide,
 } );
 
+
 var side_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0xa20101,
+	color: 0x404040,
 	metalness: 0,
 	roughness: 0.1,
 	// alphaMap: texture,
@@ -120,6 +149,7 @@ var side_mat = new THREE.MeshPhysicalMaterial( {
 	envMap: envMap,
 	envMapIntensity: 0.3,
 	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
+	side: THREE.DoubleSide,
 } );
 
 //Map floor 1 ThreeJsWithJSModule\models\fbx\house\narrow-floorboards1-albedo.png
@@ -154,10 +184,10 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 	roughnessMap:map_roughness_floor,
 	displacementMap: map_displacementMap_floor ,
 	aoMap:map_aoMap_floor,
-	clearcoat: 0.3,
+	clearcoat: 0.1,
 	metalness: 0.0,
 	normalScale: new THREE.Vector2( 0.15, 0.15 ),
-	roughness : 0.7,
+	roughness : 0.1,
 	aoMapIntensity : 0.01,
 	envMapIntensity: 0.05,
 	normalScale : new THREE.Vector2(0.5, 0.5),
@@ -221,18 +251,65 @@ scene.add( spot );
 
 //#region Light
 
-// var aoLight = new THREE.AmbientLight( 0x404040 ); // soft white light
-// scene.add( aoLight );
+var aoLight = new THREE.AmbientLight( 0x404040 ); // soft white light
+scene.add( aoLight );
 
 
 // var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 ); 
 // scene.add(hemiLight);
 
-// var pointLight_01 = new THREE.PointLight( 0xffffff, 1);
+// var pointLight_01 = new THREE.PointLight( 0xffffff, 0.2);
+// pointLight_01.position.x = 100;
 // pointLight_01.position.y = 30;
+// pointLight_01.position.z = 300;
+// pointLight_01.castShadow = true;            // default false
+// pointLight_01.shadow.radius = 30;
 // scene.add( pointLight_01 );
 
+
+// //Set up shadow properties for the light
+// pointLight_01.shadow.mapSize.width = 1024;  // default
+// pointLight_01.shadow.mapSize.height = 1024; // default
+// pointLight_01.shadow.camera.near = 0.1;    // default
+// pointLight_01.shadow.camera.far = 500;     // default
+// light.shadow.camera = new THREE.OrthographicCamera( -100, 100, 100, -100, 0.5, 1000 ); 
+
+
+//Create a DirectionalLight and turn on shadows for the light
+var directionalLight = new THREE.DirectionalLight( 0xffffff, 3 );
+directionalLight.position.set( -180, 100, 0 ); 			//default; light shining from top
+directionalLight.castShadow = true;            // default false
+directionalLight.shadow.radius = 100;
+scene.add( directionalLight );
+
+//Set up shadow properties for the light
+directionalLight.shadow.bias = -0.001;  
+directionalLight.shadow.mapSize.width = 4096;  // default
+directionalLight.shadow.mapSize.height = 4096; // default
+directionalLight.shadow.camera.near = 0.1;    // default
+directionalLight.shadow.camera.far = 5000;     // default
+
+
+const d = 300;
+directionalLight.shadow.camera.left = - d;
+directionalLight.shadow.camera.right = d;
+directionalLight.shadow.camera.top = d;
+directionalLight.shadow.camera.bottom = - d;
+
+
+scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
 //#endregion
+
+
+//Create a sphere that cast shadows (but does not receive them)
+var sphereGeometry = new THREE.SphereBufferGeometry( 5, 96, 96 );
+
+var sphere = new THREE.Mesh( sphereGeometry, glass_mat );
+sphere.position.set( 100, 10, -30 );
+sphere.castShadow = true; //default is false
+sphere.receiveShadow = false; //default
+scene.add( sphere );
+
 
 
 function addSelectedObject( object ) 
@@ -259,7 +336,7 @@ function checkIntersection()
 				outlinePass.selectedObjects = [];
 				spot.visible = false;
 			}
-			else if(selectedObject.name !== "spot_camera_pointer" )
+			if(selectedObject.name !== "spot_camera_pointer" )
 			{
 				addSelectedObject( selectedObject );
 				outlinePass.selectedObjects = selectedObjects;
@@ -296,30 +373,6 @@ init()
 render();
 
 function init() {
-
-	// LIGHTS
-
-	var light = new THREE.DirectionalLight( 0xaabbff, 0.8 );
-	light.position.x = 0;
-	light.position.y = 100;
-	light.position.z = 0;
-    // light.castShadow = true;
-    light.shadowCameraVisible = false;
-	light.name = 'Dir. Light';
-	light.shadow.camera.near = 0.1;
-	light.shadow.camera.far = 500;
-	light.shadow.camera.right = 17;
-	light.shadow.camera.left = - 17;
-	light.shadow.camera.top	= 17;
-	light.shadow.camera.bottom = - 17;
-	light.shadow.mapSize.width = 512;
-	light.shadow.mapSize.height = 512;
-	light.shadow.radius = 4;
-	light.shadow.bias = -0.0005;
-	scene.add( light );
-
-
-
 	// MODEL
 
 	loadModelWithHDR();
@@ -339,48 +392,48 @@ function init() {
 	outlinePass.hiddenEdgeColor.set( "#000000" );
 	composer.addPass( outlinePass );
 
-	bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), -0.5, 0.1, 0.1 );
+	bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 0.1, 0.05, 0.2 );
 
-	// composer.addPass( bloomPass );
+	composer.addPass( bloomPass );
 
 	// composer.addPass( saoPass );
 
 
-	// Add Controls Attributer
-	// controls.ground.push( floor_plane );
-	controls.addEventListener( 'move', function ( event ) 
-	{
-		console.log(controls.ground);
-		let intersect = event.intersect;
-		let normal = intersect.face.normal;
+// 	// Add Controls Attributer
+// 	// controls.ground.push( floor_plane );
+// 	controls.addEventListener( 'move', function ( event ) 
+// 	{
+// 		// console.log(controls.ground);
+// 		let intersect = event.intersect;
+// 		let normal = intersect.face.normal;
 
-		// console.log(intersect);
+// 		// console.log(intersect);
 
-		if(intersect.object.name === "FloorSurface")
-		{
-			if ( normal.z !== 1) 
-			{
-				spot.visible = false;
-				controls.enabled_move = false;
-			} else {
-				spot.visible = true;
-				// spot.position.set( 0, 0, 0 );
-				console.log(intersect.point );
-				console.log(spot.position );
+// 		if(intersect.object.name === "FloorSurface")
+// 		{
+// 			if ( normal.z !== 1) 
+// 			{
+// 				spot.visible = false;
+// 				controls.enabled_move = false;
+// 			} else {
+// 				spot.visible = true;
+// 				// spot.position.set( 0, 0, 0 );
+// 				// console.log(intersect.point );
+// 				// console.log(spot.position );
 
-				// spot.position.copy( intersect.point );
-				spot.position.set( intersect.point );
-				spot.position.addScaledVector( normal, 0.001 );
+// 				// spot.position.copy( intersect.point );
+// 				spot.position.set( intersect.point );
+// 				spot.position.addScaledVector( normal, 0.001 );
 	
-				controls.enabled_move = true;
-			}
-		}
-		else
-		{
-			spot.visible = false;
-			controls.enabled_move = false;
-		}
-	} );
+// 				controls.enabled_move = true;
+// 			}
+// 		}
+// 		else
+// 		{
+// 			spot.visible = false;
+// 			controls.enabled_move = false;
+// 		}
+// 	} );
 }
 
 async function loadModelWithHDR() {
@@ -410,7 +463,6 @@ function readModel() {
 				child.castShadow = true;
 				if ( child instanceof THREE.Mesh ) 
 				{
-					
 					if(
 						child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
 						child.name ==="polySurface47" || child.name ==="polySurface32")
@@ -460,24 +512,30 @@ function readModel() {
 		//Load House
 		fbxLoader.load('../models/fbx/House/HouseModel.fbx', (root) => {
 			root.traverse( function ( child ) {
+				console.log(child.name)
 				child.castShadow = true;
+				child.receiveShadow = true;
 				if(child.name === "FloorSurface")
 				{
-					child.receiveShadow = true;
 					child.material = floor_mat;
-					controls.ground.push( child );
+					// controls.ground.push( child );
 				}
 				else if(child.name === "GlassDoor")
 				{
 					child.material = glass_mat;
+					child.castShadow = false;
 				}
 				else if(child.name === "wall")
 				{
-					child.material = wall_mat;
+					child.material = side_mat;
 				}
 				else if(child.name === "Side")
 				{
 					child.material = side_mat;
+				}
+				else if(child.name === "roof")
+				{
+					child.material = roof_mat;
 				}
 			} );
 			root.scale.set(0.5,0.5,0.5);
@@ -539,5 +597,4 @@ function render() {
 	// renderer.render( scene, camera );
 	composer.render(); //This render() will show outline of object
 }
-
 //#endregion
