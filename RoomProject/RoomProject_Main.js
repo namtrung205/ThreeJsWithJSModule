@@ -114,19 +114,45 @@ var glass_mat = new THREE.MeshPhysicalMaterial( {
 } );
 
 //Wall Material
-var wall_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0x40ffff,
-	metalness: 0,
-	roughness: 0.3,
-	// alphaMap: texture,
-	// alphaTest: 0.5,
-	// envMap: envMap,
-	// envMapIntensity: 0.2,
-	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
-	side: THREE.DoubleSide,
-} );
+//Map wall 1 D:\DEV\WebGL\ThreeJS\ThreeJsWithJsModule\ThreeJsWithJSModule\models\fbx\house\Texture\smooth-stucco-ue\smooth-stucco-albedo.png
+var map_text_wall = tex_loader.load( '../models/fbx/house/texture/smooth-stucco-ue/smooth-stucco-albedo.png' );
+map_text_wall.wrapS = THREE.RepeatWrapping;
+map_text_wall.wrapT = THREE.RepeatWrapping;
 
-//Wall Material
+var map_normal_wall = tex_loader.load('../models/fbx/house/texture/smooth-stucco-ue/smooth-stucco-Normal-dx.png');
+map_normal_wall.wrapS = THREE.RepeatWrapping;
+map_normal_wall.wrapT = THREE.RepeatWrapping;
+
+var map_roughness_wall = tex_loader.load('../models/fbx/house/texture/smooth-stucco-ue/smooth-stucco-Roughness.png');
+map_roughness_wall.wrapS = THREE.RepeatWrapping;
+map_roughness_wall.wrapT = THREE.RepeatWrapping;
+
+var map_displacementMap_wall = tex_loader.load('../models/fbx/house/texture/smooth-stucco-ue/smooth-stucco-Height.png');
+map_displacementMap_wall.wrapS = THREE.RepeatWrapping;
+map_displacementMap_wall.wrapT = THREE.RepeatWrapping;
+
+var map_aoMap_wall = tex_loader.load('../models/fbx/house/texture/smooth-stucco-ue/smooth-stucco-ao.png');
+map_aoMap_wall.wrapS = THREE.RepeatWrapping;
+map_aoMap_wall.wrapT = THREE.RepeatWrapping;
+
+
+var wall_mat = new THREE.MeshPhysicalMaterial( { 
+	map: map_text_wall,
+	normalMap: map_normal_wall,
+	roughnessMap:map_roughness_wall,
+	// displacementMap: map_displacementMap_wall ,
+	aoMap:map_aoMap_wall,
+	metalness: 0.0,
+	normalScale: new THREE.Vector2( 0.15, 0.15 ),
+	roughness : 0.45,
+	aoMapIntensity : 0.001,
+	envMapIntensity: 0.05,
+	normalScale : new THREE.Vector2(0.3, 0.3),
+	side: THREE.DoubleSide} );
+
+
+
+//Roof Material
 var roof_mat = new THREE.MeshPhysicalMaterial( {
 	color: 0x40ffff,
 	metalness: 0,
@@ -141,7 +167,7 @@ var roof_mat = new THREE.MeshPhysicalMaterial( {
 
 
 var side_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0x404040,
+	color: 0xffffff,
 	metalness: 0,
 	roughness: 0.1,
 	// alphaMap: texture,
@@ -180,17 +206,23 @@ map_aoMap_floor.wrapT = THREE.RepeatWrapping;
 
 var floor_mat = new THREE.MeshPhysicalMaterial( { 
 	map: map_text_floor,
-	normalMap: map_normal_floor,
+
 	roughnessMap:map_roughness_floor,
-	displacementMap: map_displacementMap_floor ,
+	roughness : 0.4,
+
 	aoMap:map_aoMap_floor,
-	clearcoat: 0.1,
+
+	clearcoat: 0.4,
 	metalness: 0.0,
-	normalScale: new THREE.Vector2( 0.15, 0.15 ),
-	roughness : 0.1,
+
 	aoMapIntensity : 0.01,
 	envMapIntensity: 0.05,
-	normalScale : new THREE.Vector2(0.5, 0.5),
+
+	normalMap: map_normal_floor,
+	normalScale : new THREE.Vector2(0.2, 0.2),
+	clearcoatNormalMap: clearcoatNormaMap,
+	clearcoatNormalScale: new THREE.Vector2( 2.0, - 2.0 ),
+
 	side: THREE.DoubleSide} );
 
 //#endregion
@@ -251,20 +283,12 @@ scene.add( spot );
 
 //#region Light
 
-var aoLight = new THREE.AmbientLight( 0x404040 ); // soft white light
+var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
 scene.add( aoLight );
 
-
-// var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 ); 
-// scene.add(hemiLight);
-
-// var pointLight_01 = new THREE.PointLight( 0xffffff, 0.2);
-// pointLight_01.position.x = 100;
-// pointLight_01.position.y = 30;
-// pointLight_01.position.z = 300;
-// pointLight_01.castShadow = true;            // default false
-// pointLight_01.shadow.radius = 30;
-// scene.add( pointLight_01 );
+var pointLight_01 = new THREE.PointLight( 0xffffff, 0.2);
+pointLight_01.position.y = 30;
+scene.add( pointLight_01 );
 
 
 // //Set up shadow properties for the light
@@ -394,7 +418,7 @@ function init() {
 
 	bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 0.1, 0.05, 0.2 );
 
-	composer.addPass( bloomPass );
+	// composer.addPass( bloomPass );
 
 	// composer.addPass( saoPass );
 
@@ -461,6 +485,7 @@ function readModel() {
 		fbxLoader.load('../models/fbx/Chair/source/chair.fbx', (root) => {
 			root.traverse( function ( child ) {
 				child.castShadow = true;
+				child.receiveShadow = true;
 				if ( child instanceof THREE.Mesh ) 
 				{
 					if(
@@ -523,19 +548,25 @@ function readModel() {
 				else if(child.name === "GlassDoor")
 				{
 					child.material = glass_mat;
+					child.material.emissive = 2;
 					child.castShadow = false;
 				}
 				else if(child.name === "wall")
 				{
-					child.material = side_mat;
+					child.material = wall_mat;
 				}
 				else if(child.name === "Side")
 				{
-					child.material = side_mat;
+					child.material = wall_mat;
 				}
 				else if(child.name === "roof")
 				{
-					child.material = roof_mat;
+					child.material = side_mat;
+				}
+				else if(child.name === "ceiling")
+				{
+					child.material = side_mat;
+
 				}
 			} );
 			root.scale.set(0.5,0.5,0.5);
