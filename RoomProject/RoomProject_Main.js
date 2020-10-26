@@ -14,6 +14,10 @@ import { ShaderPass } from '../Libs/ThreeJs/jsm/postprocessing/ShaderPass.js';
 import { RenderPass } from '../Libs/ThreeJs/jsm/postprocessing/RenderPass.js';
 import * as dat from '../Libs/ThreeJs/jsm/libs/dat.gui.module.js';
 
+//Light
+import { RectAreaLightHelper } from '../Libs/ThreeJs/jsm/helpers/RectAreaLightHelper.js';
+import { RectAreaLightUniformsLib } from '../Libs/ThreeJs/jsm/lights/RectAreaLightUniformsLib.js';
+
 //Bloom
 import { UnrealBloomPass } from '../Libs/ThreeJs/jsm/postprocessing/UnrealBloomPass.js';
 import { SAOPass } from '../Libs/ThreeJs/jsm/postprocessing/SAOPass.js';
@@ -283,8 +287,8 @@ scene.add( spot );
 
 //#region Light
 
-var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
-scene.add( aoLight );
+// var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
+// scene.add( aoLight );
 
 var pointLight_01 = new THREE.PointLight( 0xffffff, 0.2);
 pointLight_01.position.y = 30;
@@ -300,7 +304,7 @@ scene.add( pointLight_01 );
 
 
 //Create a DirectionalLight and turn on shadows for the light
-var directionalLight = new THREE.DirectionalLight( 0xffffff, 3 );
+var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
 directionalLight.position.set( -180, 100, 0 ); 			//default; light shining from top
 directionalLight.castShadow = true;            // default false
 directionalLight.shadow.radius = 100;
@@ -398,6 +402,16 @@ render();
 
 function init() {
 	// MODEL
+
+	RectAreaLightUniformsLib.init();
+
+	var rectLight = new THREE.RectAreaLight( 0xffffff, 10, 10, 10 );
+	rectLight.position.set( 15, 15, 0 );
+	scene.add( rectLight );
+
+	var rectLightHelper = new RectAreaLightHelper( rectLight );
+	rectLight.add( rectLightHelper );
+
 
 	loadModelWithHDR();
 	readModel();
