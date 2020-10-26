@@ -147,14 +147,11 @@ var wall_mat = new THREE.MeshPhysicalMaterial( {
 	// displacementMap: map_displacementMap_wall ,
 	aoMap:map_aoMap_wall,
 	metalness: 0.0,
-	normalScale: new THREE.Vector2( 0.15, 0.15 ),
+	normalScale: new THREE.Vector2( 0.1, 0.1 ),
 	roughness : 0.45,
 	aoMapIntensity : 0.001,
 	envMapIntensity: 0.05,
-	normalScale : new THREE.Vector2(0.3, 0.3),
 	side: THREE.DoubleSide} );
-
-
 
 //Roof Material
 var roof_mat = new THREE.MeshPhysicalMaterial( {
@@ -290,9 +287,9 @@ scene.add( spot );
 // var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
 // scene.add( aoLight );
 
-var pointLight_01 = new THREE.PointLight( 0xffffff, 0.2);
-pointLight_01.position.y = 30;
-scene.add( pointLight_01 );
+// var pointLight_01 = new THREE.PointLight( 0xffffff, 0.2);
+// pointLight_01.position.y = 30;
+// scene.add( pointLight_01 );
 
 
 // //Set up shadow properties for the light
@@ -303,29 +300,29 @@ scene.add( pointLight_01 );
 // light.shadow.camera = new THREE.OrthographicCamera( -100, 100, 100, -100, 0.5, 1000 ); 
 
 
-//Create a DirectionalLight and turn on shadows for the light
-var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-directionalLight.position.set( -180, 100, 0 ); 			//default; light shining from top
-directionalLight.castShadow = true;            // default false
-directionalLight.shadow.radius = 100;
-scene.add( directionalLight );
+// //Create a DirectionalLight and turn on shadows for the light
+// var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+// directionalLight.position.set( -180, 100, 0 ); 			//default; light shining from top
+// directionalLight.castShadow = true;            // default false
+// directionalLight.shadow.radius = 100;
+// scene.add( directionalLight );
 
-//Set up shadow properties for the light
-directionalLight.shadow.bias = -0.001;  
-directionalLight.shadow.mapSize.width = 4096;  // default
-directionalLight.shadow.mapSize.height = 4096; // default
-directionalLight.shadow.camera.near = 0.1;    // default
-directionalLight.shadow.camera.far = 5000;     // default
-
-
-const d = 300;
-directionalLight.shadow.camera.left = - d;
-directionalLight.shadow.camera.right = d;
-directionalLight.shadow.camera.top = d;
-directionalLight.shadow.camera.bottom = - d;
+// //Set up shadow properties for the light
+// directionalLight.shadow.bias = -0.001;  
+// directionalLight.shadow.mapSize.width = 4096;  // default
+// directionalLight.shadow.mapSize.height = 4096; // default
+// directionalLight.shadow.camera.near = 0.1;    // default
+// directionalLight.shadow.camera.far = 5000;     // default
 
 
-scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
+// const d = 300;
+// directionalLight.shadow.camera.left = - d;
+// directionalLight.shadow.camera.right = d;
+// directionalLight.shadow.camera.top = d;
+// directionalLight.shadow.camera.bottom = - d;
+
+
+// scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
 //#endregion
 
 
@@ -405,8 +402,12 @@ function init() {
 
 	RectAreaLightUniformsLib.init();
 
-	var rectLight = new THREE.RectAreaLight( 0xffffff, 10, 10, 10 );
-	rectLight.position.set( 15, 15, 0 );
+	var rectLight = new THREE.RectAreaLight( 0xffffff, 60, 10, 10 );
+	rectLight.position.set( 60, 56, 0 );
+	var quaternion = new THREE.Quaternion();
+	quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0), -Math.PI / 2 );
+	rectLight.applyQuaternion(quaternion)
+
 	scene.add( rectLight );
 
 	var rectLightHelper = new RectAreaLightHelper( rectLight );
