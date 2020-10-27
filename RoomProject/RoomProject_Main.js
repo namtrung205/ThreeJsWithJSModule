@@ -114,8 +114,22 @@ var glass_mat = new THREE.MeshPhysicalMaterial( {
 	roughness: 0.2,
 	// transmission: 0.5, // use material.transmission for glass materials
 	opacity: 0.6,  // set material.OPACITY to 1 when material.transmission is non-zero
-	transparent: true
+	transparent: true,
+
+	emissive : 0xffffff,
+	emissiveIntensity : 10,
+
 } );
+
+var light_mat = new THREE.MeshPhysicalMaterial( {
+	color: 0xffffff,
+	roughness: 0.2,
+
+	emissive : 0xffffff,
+	emissiveIntensity : 10,
+
+} );
+
 
 //Wall Material
 //Map wall 1 D:\DEV\WebGL\ThreeJS\ThreeJsWithJsModule\ThreeJsWithJSModule\models\fbx\house\Texture\smooth-stucco-ue\smooth-stucco-albedo.png
@@ -287,8 +301,8 @@ scene.add( spot );
 // var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
 // scene.add( aoLight );
 
-// var pointLight_01 = new THREE.PointLight( 0xffffff, 0.2);
-// pointLight_01.position.y = 30;
+// var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
+// pointLight_01.position.set( 0, 30, -30 );
 // scene.add( pointLight_01 );
 
 
@@ -325,15 +339,41 @@ scene.add( spot );
 // scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
 //#endregion
 
+//TEst light
+
+//Create a PointLight and turn on shadows for the light
+var light = new THREE.PointLight( 0xffffff, 1, 100 );
+light.position.set( 0, 30, -30 );
+light.castShadow = true;            // default false
+scene.add( light );
+
+//Set up shadow properties for the light
+light.shadow.mapSize.width = 1024;  // default
+light.shadow.mapSize.height = 1024; // default
+light.shadow.camera.near = 0.05;       // default
+light.shadow.camera.far = 100     // default
+
+light.shadow.bias = -0.001;
 
 //Create a sphere that cast shadows (but does not receive them)
-var sphereGeometry = new THREE.SphereBufferGeometry( 5, 96, 96 );
-
-var sphere = new THREE.Mesh( sphereGeometry, glass_mat );
-sphere.position.set( 100, 10, -30 );
-sphere.castShadow = true; //default is false
+var sphereGeometry = new THREE.SphereBufferGeometry( 1, 32, 32 );
+var sphere = new THREE.Mesh( sphereGeometry, light_mat );
+sphere.position.set( 0, 30, -30 );
+// sphere.castShadow = true; //default is false
 sphere.receiveShadow = false; //default
 scene.add( sphere );
+
+
+// //Create a helper for the shadow camera (optional)
+// var helper = new THREE.CameraHelper( light.shadow.camera );
+// scene.add( helper );
+
+
+//Create a sphere that cast shadows (but does not receive them)
+
+var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
+pointLight_01.position.set( 0, 30, -30 );
+scene.add( pointLight_01 );
 
 
 
@@ -400,21 +440,21 @@ render();
 function init() {
 	// MODEL
 
-	RectAreaLightUniformsLib.init();
+	// RectAreaLightUniformsLib.init();
 
-	var rectLight = new THREE.RectAreaLight( 0xffffff, 60, 10, 10 );
-	rectLight.position.set( 60, 56, 0 );
-	var quaternion = new THREE.Quaternion();
-	quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0), -Math.PI / 2 );
-	rectLight.applyQuaternion(quaternion)
+	// var rectLight = new THREE.RectAreaLight( 0xffffff, 60, 10, 10 );
+	// rectLight.position.set( 60, 56, 0 );
+	// var quaternion = new THREE.Quaternion();
+	// quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0), -Math.PI / 2 );
+	// rectLight.applyQuaternion(quaternion)
 
-	scene.add( rectLight );
+	// scene.add( rectLight );
 
-	var rectLightHelper = new RectAreaLightHelper( rectLight );
-	rectLight.add( rectLightHelper );
+	// var rectLightHelper = new RectAreaLightHelper( rectLight );
+	// rectLight.add( rectLightHelper );
 
 
-	loadModelWithHDR();
+	// loadModelWithHDR();
 	readModel();
 
 	composer = new EffectComposer( renderer );
@@ -544,7 +584,7 @@ function readModel() {
 				}
 			} );
 			scene.add(root);
-			root.position.set(30,4,-45)
+			root.position.set(30,3.36,-45)
 			fitCameraToObject(camera, root, 15);
 			console.log("loaded Chair")
 		});
