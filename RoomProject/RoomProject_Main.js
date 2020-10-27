@@ -79,7 +79,7 @@ var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 var selectedObjects = [];
 var composer, effectFXAA, outlinePass, saoPass, bloomPass;
-
+var material_select_container  = document.getElementById( 'material_container' );
 var envMap;
 
 
@@ -342,37 +342,35 @@ scene.add( spot );
 //TEst light
 
 //Create a PointLight and turn on shadows for the light
-var light = new THREE.PointLight( 0xffffff, 1, 100 );
-light.position.set( 0, 30, -30 );
+var light = new THREE.PointLight( 0xffffff, 1, 1000 );
+light.position.set( 0, 55, -30 );
 light.castShadow = true;            // default false
 scene.add( light );
 
 //Set up shadow properties for the light
-light.shadow.mapSize.width = 1024;  // default
-light.shadow.mapSize.height = 1024; // default
+light.shadow.mapSize.width = 512;  // default
+light.shadow.mapSize.height = 512; // default
 light.shadow.camera.near = 0.05;       // default
-light.shadow.camera.far = 100     // default
+light.shadow.camera.far = 300    // default
 
-light.shadow.bias = -0.001;
+light.shadow.bias = -0.003;
 
 //Create a sphere that cast shadows (but does not receive them)
 var sphereGeometry = new THREE.SphereBufferGeometry( 1, 32, 32 );
 var sphere = new THREE.Mesh( sphereGeometry, light_mat );
-sphere.position.set( 0, 30, -30 );
-// sphere.castShadow = true; //default is false
-sphere.receiveShadow = false; //default
+sphere.position.set( 0, 55, -30 );
 scene.add( sphere );
 
 
-// //Create a helper for the shadow camera (optional)
-// var helper = new THREE.CameraHelper( light.shadow.camera );
-// scene.add( helper );
+//Create a helper for the shadow camera (optional)
+var helper = new THREE.CameraHelper( light.shadow.camera );
+scene.add( helper );
 
 
 //Create a sphere that cast shadows (but does not receive them)
 
 var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
-pointLight_01.position.set( 0, 30, -30 );
+pointLight_01.position.set( 0, 60, -30 );
 scene.add( pointLight_01 );
 
 
@@ -414,8 +412,48 @@ function checkIntersection()
 	}
 }
 
+function fadeOut(element) {
+    var op = 1;  // initial opacity
+    var timer = setInterval(function () {
+        if (op <= 0.1){
+            clearInterval(timer);
+            element.style.display = 'none';
+        }
+        element.style.opacity = op;
+        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        op -= op * 0.1;
+    }, 50);
+}
+
+function fadeIn(element) {
+    var op = 0.1;  // initial opacity
+    element.style.display = 'block';
+    var timer = setInterval(function () {
+        if (op >= 1){
+            clearInterval(timer);
+        }
+        element.style.opacity = op;
+        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        op += op * 0.1;
+    }, 10);
+}
 
 function onMousedblClick( event ) {
+
+	console.log(outlinePass.selectedObjects);
+
+	if(outlinePass.selectedObjects.length === 0)
+	{
+		fadeOut(material_select_container);
+		// material_select_container.hidden = true;
+		console.log("Hide element");
+	}
+	else
+	{
+		fadeIn(material_select_container);
+		// material_select_container.hidden = false;
+		console.log("Show element");
+	}
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -430,7 +468,22 @@ function onMouseMove( event )
 	checkIntersection();
 }
 
-//Add event
+function onMouseClickMaterialItem(event) {
+	console.log(event.target.id);
+	
+}
+
+
+
+//Add Event for material iamge
+var material_iamge_items = document.getElementsByClassName("material_item_image");
+for(var i = 0; i < material_iamge_items.length; i++)
+{
+    material_iamge_items[i].addEventListener("click", onMouseClickMaterialItem);
+}
+
+
+//Add event Window
 window.addEventListener( 'dblclick', onMousedblClick, true );
 window.addEventListener('mousemove', onMouseMove, true);
 
