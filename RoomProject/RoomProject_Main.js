@@ -87,7 +87,6 @@ var envMap;
 //Texture Loader
 var tex_loader = new THREE.TextureLoader();
 
-
 //Test Material
 var textureLoader = new THREE.TextureLoader();
 var normalMap2 = textureLoader.load( "../Libs/ThreeJs/textures/water/Water_1_M_Normal.jpg" );
@@ -122,10 +121,10 @@ var glass_mat = new THREE.MeshPhysicalMaterial( {
 } );
 
 var light_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0xffffff,
+	color: 0xff0000,
 	roughness: 0.2,
 
-	emissive : 0xffffff,
+	emissive : 0xff0000,
 	emissiveIntensity : 10,
 
 } );
@@ -194,27 +193,27 @@ var side_mat = new THREE.MeshPhysicalMaterial( {
 } );
 
 //Map floor 1 ThreeJsWithJSModule\models\fbx\house\narrow-floorboards1-albedo.png
-var map_text_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-albedo.png' );
+var map_text_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_COLOR.jpg' );
 map_text_floor.wrapS = THREE.RepeatWrapping;
 map_text_floor.wrapT = THREE.RepeatWrapping;
 
-var map_normal_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-normal-dx.png' );
+var map_normal_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_NORM.jpg' );
 map_normal_floor.wrapS = THREE.RepeatWrapping;
 map_normal_floor.wrapT = THREE.RepeatWrapping;
 
 
-var map_roughness_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-roughness.png');
+var map_roughness_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_ROUGH.jpg');
 map_roughness_floor.wrapS = THREE.RepeatWrapping;
 map_roughness_floor.wrapT = THREE.RepeatWrapping;
 
 
-var map_displacementMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-height.png');
+var map_displacementMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_DISP.jpg');
 map_displacementMap_floor.wrapS = THREE.RepeatWrapping;
 map_displacementMap_floor.wrapT = THREE.RepeatWrapping;
 
 
 
-var map_aoMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/narrow-floorboards1-ao.png');
+var map_aoMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_OCC.jpg');
 map_aoMap_floor.wrapS = THREE.RepeatWrapping;
 map_aoMap_floor.wrapT = THREE.RepeatWrapping;
 
@@ -226,17 +225,15 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 	roughness : 0.4,
 
 	aoMap:map_aoMap_floor,
-
-	clearcoat: 0.4,
-	metalness: 0.0,
-
-	aoMapIntensity : 0.01,
-	envMapIntensity: 0.05,
+	aoMapIntensity : 0.1,
+	envMapIntensity: 0.5,
 
 	normalMap: map_normal_floor,
-	normalScale : new THREE.Vector2(0.2, 0.2),
-	clearcoatNormalMap: clearcoatNormaMap,
-	clearcoatNormalScale: new THREE.Vector2( 2.0, - 2.0 ),
+	normalScale : new THREE.Vector2(0.5, 0.5),
+	clearcoatNormalScale: new THREE.Vector2( 2.0,  2.0 ),
+	clearcoatNormalMap: map_normal_floor,
+
+	clearcoat: 0.5,
 
 	side: THREE.DoubleSide} );
 
@@ -298,8 +295,11 @@ scene.add( spot );
 
 //#region Light
 
-// var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
-// scene.add( aoLight );
+// var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.51);
+// scene.add(sunLight);
+
+var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
+scene.add( aoLight );
 
 // var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
 // pointLight_01.position.set( 0, 30, -30 );
@@ -339,39 +339,34 @@ scene.add( spot );
 // scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
 //#endregion
 
-//TEst light
+//Test light
 
 //Create a PointLight and turn on shadows for the light
-var light = new THREE.PointLight( 0xffffff, 1, 1000 );
-light.position.set( 0, 55, -30 );
-light.castShadow = true;            // default false
-scene.add( light );
+var light_01 = new THREE.PointLight( 0xffffff, 1, 1000 );
+light_01.position.set( 0, 55, -30 );
+light_01.castShadow = true;            // default false
+scene.add( light_01 );
 
 //Set up shadow properties for the light
-light.shadow.mapSize.width = 512;  // default
-light.shadow.mapSize.height = 512; // default
-light.shadow.camera.near = 0.05;       // default
-light.shadow.camera.far = 300    // default
+light_01.shadow.mapSize.width = 512;  // default
+light_01.shadow.mapSize.height = 512; // default
+light_01.shadow.camera.near = 0.05;       // default
+light_01.shadow.camera.far = 300    // default
 
-light.shadow.bias = -0.003;
+light_01.shadow.bias = -0.003;
 
 //Create a sphere that cast shadows (but does not receive them)
-var sphereGeometry = new THREE.SphereBufferGeometry( 1, 32, 32 );
-var sphere = new THREE.Mesh( sphereGeometry, light_mat );
-sphere.position.set( 0, 55, -30 );
-scene.add( sphere );
+var light_01_geometry = new THREE.SphereBufferGeometry( 1, 32, 32 );
+var light_01_object = new THREE.Mesh( light_01_geometry, light_mat );
+light_01_object.position.set( 0, 55, -30 );
+light_01_object.name = "light_01";
+scene.add( light_01_object );
 
 
 //Create a helper for the shadow camera (optional)
-var helper = new THREE.CameraHelper( light.shadow.camera );
+var helper = new THREE.CameraHelper( light_01.shadow.camera );
 scene.add( helper );
 
-
-//Create a sphere that cast shadows (but does not receive them)
-
-var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
-pointLight_01.position.set( 0, 60, -30 );
-scene.add( pointLight_01 );
 
 
 
@@ -445,13 +440,24 @@ function onMousedblClick( event ) {
 	if(outlinePass.selectedObjects.length === 0)
 	{
 		fadeOut(material_select_container);
-		// material_select_container.hidden = true;
 		console.log("Hide element");
 	}
 	else
 	{
 		fadeIn(material_select_container);
-		// material_select_container.hidden = false;
+
+		if(outlinePass.selectedObjects[0] === light_01_object)
+		{
+			if(light_01.intensity > 0)
+			{
+				light_01.intensity = 0;
+			}
+			else
+			{
+				light_01.intensity = 1;
+			}
+		}
+
 		console.log("Show element");
 	}
 
@@ -470,7 +476,6 @@ function onMouseMove( event )
 
 function onMouseClickMaterialItem(event) {
 	console.log(event.target.id);
-	
 }
 
 
@@ -636,6 +641,7 @@ function readModel() {
 					child.material = metal_mat;
 				}
 			} );
+			root.name = "chair_model_root";
 			scene.add(root);
 			root.position.set(30,3.36,-45)
 			fitCameraToObject(camera, root, 15);
