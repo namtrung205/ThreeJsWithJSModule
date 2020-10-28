@@ -111,14 +111,17 @@ var material = new THREE.MeshPhysicalMaterial( {
 var glass_mat = new THREE.MeshPhysicalMaterial( {
 	color: 0x00ffff,
 	roughness: 0.4,
-	// transmission: 0.5, // use material.transmission for glass materials
-	opacity: 0.01,  // set material.OPACITY to 1 when material.transmission is non-zero
+	aoMapIntensity : 0.1,
+	envMapIntensity: 1,
+	transmission: 0.5, // use material.transmission for glass materials
+	opacity: 1,  // set material.OPACITY to 1 when material.transmission is non-zero
 	transparent: true,
 } );
 
 var light_mat = new THREE.MeshPhysicalMaterial( {
 	color: 0xff0000,
-	roughness: 0.2,
+	roughness: 0.4,
+
 
 	emissive : 0xff0000,
 	emissiveIntensity : 10,
@@ -158,8 +161,8 @@ var wall_mat = new THREE.MeshPhysicalMaterial( {
 	metalness: 0.0,
 	normalScale: new THREE.Vector2( 0.1, 0.1 ),
 	roughness : 0.45,
-	aoMapIntensity : 0.001,
-	envMapIntensity: 0.05,
+	aoMapIntensity : 0.1,
+	envMapIntensity: 0.5,
 	side: THREE.DoubleSide} );
 
 //Roof Material
@@ -344,8 +347,8 @@ light_01.castShadow = true;            // default false
 scene.add( light_01 );
 
 //Set up shadow properties for the light
-light_01.shadow.mapSize.width = 512;  // default
-light_01.shadow.mapSize.height = 512; // default
+light_01.shadow.mapSize.width = 1024;  // default
+light_01.shadow.mapSize.height = 1024; // default
 light_01.shadow.camera.near = 0.05;       // default
 light_01.shadow.camera.far = 300    // default
 
@@ -526,10 +529,18 @@ function init() {
 	composer.addPass( outlinePass );
 
 	bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 0.1, 0.05, 0.2 );
-
 	// composer.addPass( bloomPass );
 
 	// composer.addPass( saoPass );
+	var pixelRatio = 1;
+	if (window.devicePixelRatio !== undefined) {
+		pixelRatio = window.devicePixelRatio;
+	}
+
+	effectFXAA = new ShaderPass( FXAAShader );
+	effectFXAA.uniforms[ 'resolution' ].value.x = 1 / ( window.innerWidth * pixelRatio );
+	effectFXAA.uniforms[ 'resolution' ].value.y = 1 / ( window.innerHeight * pixelRatio );
+	composer.addPass( effectFXAA ); 
 
 
 // 	// Add Controls Attributer
