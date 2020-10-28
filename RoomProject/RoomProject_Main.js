@@ -109,15 +109,11 @@ var material = new THREE.MeshPhysicalMaterial( {
 
 //GlassMat
 var glass_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0xffffff,
-	roughness: 0.2,
+	color: 0x00ffff,
+	roughness: 0.4,
 	// transmission: 0.5, // use material.transmission for glass materials
-	opacity: 0.6,  // set material.OPACITY to 1 when material.transmission is non-zero
+	opacity: 0.01,  // set material.OPACITY to 1 when material.transmission is non-zero
 	transparent: true,
-
-	emissive : 0xffffff,
-	emissiveIntensity : 10,
-
 } );
 
 var light_mat = new THREE.MeshPhysicalMaterial( {
@@ -298,8 +294,8 @@ scene.add( spot );
 // var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.51);
 // scene.add(sunLight);
 
-var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
-scene.add( aoLight );
+// var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
+// scene.add( aoLight );
 
 // var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
 // pointLight_01.position.set( 0, 30, -30 );
@@ -512,7 +508,7 @@ function init() {
 	// rectLight.add( rectLightHelper );
 
 
-	// loadModelWithHDR();
+	loadModelWithHDR();
 	readModel();
 
 	composer = new EffectComposer( renderer );
@@ -580,10 +576,10 @@ async function loadModelWithHDR() {
 	var rgbeLoader = new RGBELoader()
 		.setDataType( THREE.UnsignedByteType )
 		.setPath( '../Libs/ThreeJs/textures/equirectangular/' );
-	var [ texture] = await Promise.all( [rgbeLoader.loadAsync( 'royal_esplanade_1k.hdr' )] );
+	var [ texture] = await Promise.all( [rgbeLoader.loadAsync( 'winter_lake_01_4k.hdr' )] );
 	// environment
 	envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-	// scene.background = envMap; //Not set bG
+	scene.background = envMap; //Not set bG
 	scene.environment = envMap;
 	texture.dispose();
 	pmremGenerator.dispose();
