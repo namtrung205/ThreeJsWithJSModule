@@ -294,8 +294,8 @@ scene.add( spot );
 
 //#region Light
 
-// var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.51);
-// scene.add(sunLight);
+var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.51);
+scene.add(sunLight);
 
 // var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
 // scene.add( aoLight );
