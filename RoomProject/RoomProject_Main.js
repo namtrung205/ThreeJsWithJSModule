@@ -237,7 +237,7 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 //#endregion
 
 //#region  Spot Material
-var spot_mat = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 1} );
+
 
 //#endregion
 
@@ -272,8 +272,7 @@ var platic_mat = new THREE.MeshPhysicalMaterial( {  map: map_text_platic,  norma
 
 
 //#region Spot Geo
-
-var sphereTest = new THREE.SphereBufferGeometry( 1, 32, 32 );
+var spot_mat = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.1} );
 var spot_geometry = new THREE.CircleGeometry( 2, 32 );
 var spot = new THREE.Mesh( spot_geometry, spot_mat );
 
@@ -283,13 +282,10 @@ spot.applyQuaternion(quaternion)
 spot.name = "spot_camera_pointer"
 spot.visible = false;
 
-
-// let ringMaterial = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.9} );
-// let ringGeometry = new THREE.RingBufferGeometry( 2.0, 2.4, 32 );
-// let ring = new THREE.Mesh( ringGeometry, ringMaterial );
-// spot.add( ring );
-
-spot = new THREE.Mesh( sphereTest, spot_mat );
+let ringMaterial = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.9} );
+let ringGeometry = new THREE.RingBufferGeometry( 2.0, 2.4, 32 );
+let ring = new THREE.Mesh( ringGeometry, ringMaterial );
+spot.add( ring );
 
 scene.add( spot );
 
@@ -555,27 +551,37 @@ function init() {
 		// console.log(controls.ground);
 		let intersect = event.intersect;
 		// console.log(intersect);
+		console.log(intersect.object.name);
 		if(intersect.object.name === "FloorSurface")
 		{
-			let normal = intersect.face.normal;
-			if ( normal.z !== 1) 
-			{
-				spot.visible = false;
-				controls.enabled_move = false;
-			} else {
-				spot.visible = true;
 
-				console.log(intersect.point );
+			spot.visible = true;
+
+			console.log("interPoint: ")
+			console.log(intersect.point );
+			spot.position.set( intersect.point.x, intersect.point.y + 0.5, intersect.point.z );
+			console.log("Spot: ")
+			console.log(spot.position );
+			// spot.position.addScaledVector( normal, 0.001 );
+			controls.enabled_move = true;
 
 
-				spot.position.copy( intersect.point );
-				spot.position.set( intersect.point );
-				console.log(spot.position );
+			// let normal = intersect.face.normal;
+			// if ( normal.z !== 1) 
+			// {
+			// 	spot.visible = false;
+			// 	controls.enabled_move = false;
+			// } else {
+			// 	spot.visible = true;
 
-				// spot.position.addScaledVector( normal, 0.001 );
-	
-				controls.enabled_move = true;
-			}
+			// 	console.log("interPoint: ")
+			// 	console.log(intersect.point );
+			// 	spot.position.set( intersect.point.x, intersect.point.y + 0.1, intersect.point.z );
+			// 	console.log("Spot: ")
+			// 	console.log(spot.position );
+			// 	spot.position.addScaledVector( normal, 0.001 );
+			// 	controls.enabled_move = true;
+			// }
 		}
 		else
 		{
