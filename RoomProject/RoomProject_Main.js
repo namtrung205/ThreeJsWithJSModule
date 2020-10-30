@@ -67,9 +67,9 @@ renderer.toneMappingExposure = 1;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 //Create Control
-// var controls = new IndoorControls( camera, renderer.domElement, scene ) ;
+var controls = new IndoorControls( camera, renderer.domElement, scene ) ;
 
-var controls = new OrbitControls( camera, renderer.domElement, scene ) ;
+// var controls = new OrbitControls( camera, renderer.domElement, scene ) ;
 
 var resolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 
@@ -119,13 +119,11 @@ var glass_mat = new THREE.MeshPhysicalMaterial( {
 } );
 
 var light_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0xff0000,
+	color: 0xffffff,
 	roughness: 0.4,
 
-
-	emissive : 0xff0000,
-	emissiveIntensity : 10,
-
+	emissive : 0xffffff,
+	emissiveIntensity : 30,
 } );
 
 
@@ -239,7 +237,7 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 //#endregion
 
 //#region  Spot Material
-var spot_mat = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.3} );
+var spot_mat = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 1} );
 
 //#endregion
 
@@ -274,6 +272,8 @@ var platic_mat = new THREE.MeshPhysicalMaterial( {  map: map_text_platic,  norma
 
 
 //#region Spot Geo
+
+var sphereTest = new THREE.SphereBufferGeometry( 1, 32, 32 );
 var spot_geometry = new THREE.CircleGeometry( 2, 32 );
 var spot = new THREE.Mesh( spot_geometry, spot_mat );
 
@@ -284,18 +284,21 @@ spot.name = "spot_camera_pointer"
 spot.visible = false;
 
 
-let ringMaterial = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.9} );
-let ringGeometry = new THREE.RingBufferGeometry( 2.0, 2.4, 32 );
-let ring = new THREE.Mesh( ringGeometry, ringMaterial );
-spot.add( ring );
+// let ringMaterial = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.9} );
+// let ringGeometry = new THREE.RingBufferGeometry( 2.0, 2.4, 32 );
+// let ring = new THREE.Mesh( ringGeometry, ringMaterial );
+// spot.add( ring );
+
+spot = new THREE.Mesh( sphereTest, spot_mat );
+
 scene.add( spot );
 
 //#endregion
 
 //#region Light
 
-var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.51);
-scene.add(sunLight);
+// var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.51);
+// scene.add(sunLight);
 
 // var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
 // scene.add( aoLight );
@@ -342,7 +345,7 @@ scene.add(sunLight);
 
 //Create a PointLight and turn on shadows for the light
 var light_01 = new THREE.PointLight( 0xffffff, 1, 1000 );
-light_01.position.set( 0, 55, -30 );
+light_01.position.set( 0, 48.4, -30 );
 light_01.castShadow = true;            // default false
 scene.add( light_01 );
 
@@ -355,9 +358,9 @@ light_01.shadow.camera.far = 300    // default
 light_01.shadow.bias = -0.003;
 
 //Create a sphere that cast shadows (but does not receive them)
-var light_01_geometry = new THREE.SphereBufferGeometry( 1, 32, 32 );
+var light_01_geometry = new THREE.SphereBufferGeometry( 0.4, 32, 32 );
 var light_01_object = new THREE.Mesh( light_01_geometry, light_mat );
-light_01_object.position.set( 0, 55, -30 );
+light_01_object.position.set( 0, 48.4, -30 );
 light_01_object.name = "light_01";
 scene.add( light_01_object );
 
@@ -391,7 +394,7 @@ function checkIntersection()
 			if(selectedObject.name === "FloorSurface")
 			{
 				outlinePass.selectedObjects = [];
-				spot.visible = false;
+				// spot.visible = false;
 			}
 			if(selectedObject.name !== "spot_camera_pointer" )
 			{
@@ -402,7 +405,7 @@ function checkIntersection()
 	} 
 	else {
 		outlinePass.selectedObjects = [];
-		spot.visible = false;
+		// spot.visible = false;
 	}
 }
 
@@ -450,10 +453,12 @@ function onMousedblClick( event ) {
 			if(light_01.intensity > 0)
 			{
 				light_01.intensity = 0;
+				light_01_object.material = glass_mat;
 			}
 			else
 			{
 				light_01.intensity = 1;
+				light_01_object.material = light_mat;
 			}
 		}
 
@@ -543,41 +548,41 @@ function init() {
 	composer.addPass( effectFXAA ); 
 
 
-// 	// Add Controls Attributer
-// 	// controls.ground.push( floor_plane );
-// 	controls.addEventListener( 'move', function ( event ) 
-// 	{
-// 		// console.log(controls.ground);
-// 		let intersect = event.intersect;
-// 		let normal = intersect.face.normal;
+	// Add Controls Attributer
+	// controls.ground.push( floor_plane );
+	controls.addEventListener( 'move', function ( event ) 
+	{
+		// console.log(controls.ground);
+		let intersect = event.intersect;
+		// console.log(intersect);
+		if(intersect.object.name === "FloorSurface")
+		{
+			let normal = intersect.face.normal;
+			if ( normal.z !== 1) 
+			{
+				spot.visible = false;
+				controls.enabled_move = false;
+			} else {
+				spot.visible = true;
 
-// 		// console.log(intersect);
+				console.log(intersect.point );
 
-// 		if(intersect.object.name === "FloorSurface")
-// 		{
-// 			if ( normal.z !== 1) 
-// 			{
-// 				spot.visible = false;
-// 				controls.enabled_move = false;
-// 			} else {
-// 				spot.visible = true;
-// 				// spot.position.set( 0, 0, 0 );
-// 				// console.log(intersect.point );
-// 				// console.log(spot.position );
 
-// 				// spot.position.copy( intersect.point );
-// 				spot.position.set( intersect.point );
-// 				spot.position.addScaledVector( normal, 0.001 );
+				spot.position.copy( intersect.point );
+				spot.position.set( intersect.point );
+				console.log(spot.position );
+
+				// spot.position.addScaledVector( normal, 0.001 );
 	
-// 				controls.enabled_move = true;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			spot.visible = false;
-// 			controls.enabled_move = false;
-// 		}
-// 	} );
+				controls.enabled_move = true;
+			}
+		}
+		else
+		{
+			spot.visible = false;
+			controls.enabled_move = false;
+		}
+	} );
 }
 
 async function loadModelWithHDR() {
@@ -664,7 +669,7 @@ function readModel() {
 				if(child.name === "FloorSurface")
 				{
 					child.material = floor_mat;
-					// controls.ground.push( child );
+					controls.ground.push( child );
 				}
 				else if(child.name === "GlassDoor")
 				{
@@ -696,6 +701,23 @@ function readModel() {
 			console.log("loaded House")
 			// fitCameraToObject(camera, root, 15);
 		});
+	
+	
+		const gltfLoader = new GLTFLoader();
+		const url = '../models/gltf/ceiling_lamp/scene.gltf';
+		gltfLoader.load(url, (gltf) => 
+		{
+			const root = gltf.scene;
+			root.traverse( function ( child ) 
+			{
+
+			});
+			root.scale.set(5,5,5);
+			root.position.set( 0, 51, -30 );
+			scene.add(root);
+			fitCameraToObject(camera, root, 15);
+		});
+	
 	}
 
 function fitCameraToObject( camera, object, offset ) {
