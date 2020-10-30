@@ -67,9 +67,9 @@ renderer.toneMappingExposure = 1;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 //Create Control
-var controls = new IndoorControls( camera, renderer.domElement, scene ) ;
+// var controls = new IndoorControls( camera, renderer.domElement, scene ) ;
 
-// var controls = new OrbitControls( camera, renderer.domElement, scene ) ;
+var controls = new OrbitControls( camera, renderer.domElement, scene ) ;
 
 var resolution = new THREE.Vector2( window.innerWidth, window.innerHeight );
 
@@ -109,7 +109,7 @@ var material = new THREE.MeshPhysicalMaterial( {
 
 //GlassMat
 var glass_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0x00ffff,
+	color: 0xffffff,
 	roughness: 0.4,
 	aoMapIntensity : 0.1,
 	envMapIntensity: 1,
@@ -223,7 +223,7 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 
 	aoMap:map_aoMap_floor,
 	aoMapIntensity : 0.1, 
-	envMapIntensity: 1,
+	envMapIntensity: 0.3,
 
 	normalMap: map_normal_floor,
 	normalScale : new THREE.Vector2(0.5, 0.5),
@@ -341,7 +341,7 @@ scene.add( spot );
 
 //Create a PointLight and turn on shadows for the light
 var light_01 = new THREE.PointLight( 0xffffff, 1, 1000 );
-light_01.position.set( 0, 48.4, -30 );
+light_01.position.set( 0, 2.5, 0 );
 light_01.castShadow = true;            // default false
 scene.add( light_01 );
 
@@ -354,9 +354,9 @@ light_01.shadow.camera.far = 300    // default
 light_01.shadow.bias = -0.003;
 
 //Create a sphere that cast shadows (but does not receive them)
-var light_01_geometry = new THREE.SphereBufferGeometry( 0.4, 32, 32 );
+var light_01_geometry = new THREE.SphereBufferGeometry( 0.03, 32, 32 );
 var light_01_object = new THREE.Mesh( light_01_geometry, light_mat );
-light_01_object.position.set( 0, 48.4, -30 );
+light_01_object.position.set( 0, 2.5, 0 );
 light_01_object.name = "light_01";
 scene.add( light_01_object );
 
@@ -544,51 +544,51 @@ function init() {
 	composer.addPass( effectFXAA ); 
 
 
-	// Add Controls Attributer
-	// controls.ground.push( floor_plane );
-	controls.addEventListener( 'move', function ( event ) 
-	{
-		// console.log(controls.ground);
-		let intersect = event.intersect;
-		// console.log(intersect);
-		console.log(intersect.object.name);
-		if(intersect.object.name === "FloorSurface")
-		{
+// 	// Add Controls Attributer
+// 	// controls.ground.push( floor_plane );
+// 	controls.addEventListener( 'move', function ( event ) 
+// 	{
+// 		// console.log(controls.ground);
+// 		let intersect = event.intersect;
+// 		// console.log(intersect);
+// 		console.log(intersect.object.name);
+// 		if(intersect.object.name === "FloorSurface")
+// 		{
 
-			spot.visible = true;
+// 			spot.visible = true;
 
-			console.log("interPoint: ")
-			console.log(intersect.point );
-			spot.position.set( intersect.point.x, intersect.point.y + 0.5, intersect.point.z );
-			console.log("Spot: ")
-			console.log(spot.position );
-			// spot.position.addScaledVector( normal, 0.001 );
-			controls.enabled_move = true;
+// 			console.log("interPoint: ")
+// 			console.log(intersect.point );
+// 			spot.position.set( intersect.point.x, intersect.point.y + 0.5, intersect.point.z );
+// 			console.log("Spot: ")
+// 			console.log(spot.position );
+// 			// spot.position.addScaledVector( normal, 0.001 );
+// 			controls.enabled_move = true;
 
 
-			// let normal = intersect.face.normal;
-			// if ( normal.z !== 1) 
-			// {
-			// 	spot.visible = false;
-			// 	controls.enabled_move = false;
-			// } else {
-			// 	spot.visible = true;
+// 			// let normal = intersect.face.normal;
+// 			// if ( normal.z !== 1) 
+// 			// {
+// 			// 	spot.visible = false;
+// 			// 	controls.enabled_move = false;
+// 			// } else {
+// 			// 	spot.visible = true;
 
-			// 	console.log("interPoint: ")
-			// 	console.log(intersect.point );
-			// 	spot.position.set( intersect.point.x, intersect.point.y + 0.1, intersect.point.z );
-			// 	console.log("Spot: ")
-			// 	console.log(spot.position );
-			// 	spot.position.addScaledVector( normal, 0.001 );
-			// 	controls.enabled_move = true;
-			// }
-		}
-		else
-		{
-			spot.visible = false;
-			controls.enabled_move = false;
-		}
-	} );
+// 			// 	console.log("interPoint: ")
+// 			// 	console.log(intersect.point );
+// 			// 	spot.position.set( intersect.point.x, intersect.point.y + 0.1, intersect.point.z );
+// 			// 	console.log("Spot: ")
+// 			// 	console.log(spot.position );
+// 			// 	spot.position.addScaledVector( normal, 0.001 );
+// 			// 	controls.enabled_move = true;
+// 			// }
+// 		}
+// 		else
+// 		{
+// 			spot.visible = false;
+// 			controls.enabled_move = false;
+// 		}
+// 	} );
 }
 
 async function loadModelWithHDR() {
@@ -612,114 +612,135 @@ function readModel() {
 		// //FBXloader
 		const fbxLoader = new FBXLoader();
 
-		//Load chair
-		fbxLoader.load('../models/fbx/Chair/source/chair.fbx', (root) => {
-			root.traverse( function ( child ) {
-				child.castShadow = true;
-				child.receiveShadow = true;
-				if ( child instanceof THREE.Mesh ) 
-				{
-					if(
-						child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
-						child.name ==="polySurface47" || child.name ==="polySurface32")
-					{
-						child.material = platic_mat;
-					}
-					else if(child.name ==="polySurface46" || child.name ==="polySurface48" ||
-							child.name ==="polySurface49" || child.name ==="polySurface50" )
-					{
-						child.material = leather_mat;
-					}
-					else if(
-							child.name ==="polySurface44" || child.name ==="polySurface45" ||
-							child.name ==="polySurface42" || child.name ==="polySurface43" ||
-							child.name ==="polySurface51" || child.name === "polySurface16" ||
-							child.name ==="polySurface27" ||  child.name ==="polySurface28" ||
-							child.name ==="polySurface29" ||child.name ==="polySurface30" || 
-							child.name ==="polySurface31")
-					{
-						child.material = wood_mat;
-					}
-				else if(
-					child.name ==="polySurface19" || child.name ==="polySurface24" ||
-					child.name ==="polySurface36" || child.name ==="polySurface37" ||
-					child.name ==="polySurface38" || child.name ==="polySurface39" ||
-					child.name ==="polySurface40" || child.name ==="polySurface41" ||
-					child.name ==="polySurface34" || child.name ==="polySurface35" ||
-					child.name ==="polySurface25" ||child.name ==="polySurface20"  ||
-					child.name ==="polySurface26" || child.name ==="polySurface27" ||
-					child.name ==="polySurface22" || child.name ==="polySurface23")
-					{
-						child.material = metal_mat;
-						// child.visible = false;
-					}
-				}
-				else
-				{
-					child.material = metal_mat;
-				}
-			} );
-			root.name = "chair_model_root";
-			scene.add(root);
-			root.position.set(30,3.36,-45)
-			fitCameraToObject(camera, root, 15);
-			console.log("loaded Chair")
-		});
+		// //Load chair
+		// fbxLoader.load('../models/fbx/Chair/source/chair.fbx', (root) => {
+		// 	root.traverse( function ( child ) {
+		// 		child.castShadow = true;
+		// 		child.receiveShadow = true;
+		// 		if ( child instanceof THREE.Mesh ) 
+		// 		{
+		// 			if(
+		// 				child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
+		// 				child.name ==="polySurface47" || child.name ==="polySurface32")
+		// 			{
+		// 				child.material = platic_mat;
+		// 			}
+		// 			else if(child.name ==="polySurface46" || child.name ==="polySurface48" ||
+		// 					child.name ==="polySurface49" || child.name ==="polySurface50" )
+		// 			{
+		// 				child.material = leather_mat;
+		// 			}
+		// 			else if(
+		// 					child.name ==="polySurface44" || child.name ==="polySurface45" ||
+		// 					child.name ==="polySurface42" || child.name ==="polySurface43" ||
+		// 					child.name ==="polySurface51" || child.name === "polySurface16" ||
+		// 					child.name ==="polySurface27" ||  child.name ==="polySurface28" ||
+		// 					child.name ==="polySurface29" ||child.name ==="polySurface30" || 
+		// 					child.name ==="polySurface31")
+		// 			{
+		// 				child.material = wood_mat;
+		// 			}
+		// 		else if(
+		// 			child.name ==="polySurface19" || child.name ==="polySurface24" ||
+		// 			child.name ==="polySurface36" || child.name ==="polySurface37" ||
+		// 			child.name ==="polySurface38" || child.name ==="polySurface39" ||
+		// 			child.name ==="polySurface40" || child.name ==="polySurface41" ||
+		// 			child.name ==="polySurface34" || child.name ==="polySurface35" ||
+		// 			child.name ==="polySurface25" ||child.name ==="polySurface20"  ||
+		// 			child.name ==="polySurface26" || child.name ==="polySurface27" ||
+		// 			child.name ==="polySurface22" || child.name ==="polySurface23")
+		// 			{
+		// 				child.material = metal_mat;
+		// 				// child.visible = false;
+		// 			}
+		// 		}
+		// 		else
+		// 		{
+		// 			child.material = metal_mat;
+		// 		}
+		// 	} );
+		// 	root.name = "chair_model_root";
+		// 	scene.add(root);
+		// 	root.position.set(30,3.36,-45)
+		// 	fitCameraToObject(camera, root, 15);
+		// 	console.log("loaded Chair")
+		// });
 	
-		//Load House
-		fbxLoader.load('../models/fbx/House/HouseModel.fbx', (root) => {
-			root.traverse( function ( child ) {
-				console.log(child.name)
-				child.castShadow = true;
-				child.receiveShadow = true;
-				if(child.name === "FloorSurface")
-				{
-					child.material = floor_mat;
-					controls.ground.push( child );
-				}
-				else if(child.name === "GlassDoor")
-				{
-					child.material = glass_mat;
-					child.material.emissive = 2;
-					child.castShadow = false;
-				}
-				else if(child.name === "wall")
-				{
-					child.material = wall_mat;
-				}
-				else if(child.name === "Side")
-				{
-					child.material = wall_mat;
-				}
-				else if(child.name === "roof")
-				{
-					child.material = side_mat;
-				}
-				else if(child.name === "ceiling")
-				{
-					child.material = side_mat;
+		// //Load House
+		// fbxLoader.load('../models/fbx/House/HouseModel.fbx', (root) => {
+		// 	root.traverse( function ( child ) {
+		// 		console.log(child.name)
+		// 		child.castShadow = true;
+		// 		child.receiveShadow = true;
+		// 		if(child.name === "FloorSurface")
+		// 		{
+		// 			child.material = floor_mat;
+		// 			controls.ground.push( child );
+		// 		}
+		// 		else if(child.name === "GlassDoor")
+		// 		{
+		// 			child.material = glass_mat;
+		// 			child.material.emissive = 2;
+		// 			child.castShadow = false;
+		// 		}
+		// 		else if(child.name === "wall")
+		// 		{
+		// 			child.material = wall_mat;
+		// 		}
+		// 		else if(child.name === "Side")
+		// 		{
+		// 			child.material = wall_mat;
+		// 		}
+		// 		else if(child.name === "roof")
+		// 		{
+		// 			child.material = side_mat;
+		// 		}
+		// 		else if(child.name === "ceiling")
+		// 		{
+		// 			child.material = side_mat;
 
-				}
-			} );
-			root.scale.set(0.5,0.5,0.5);
-			root.position.set(30,0,30)
-			scene.add(root);
-			console.log("loaded House")
-			// fitCameraToObject(camera, root, 15);
-		});
+		// 		}
+		// 	} );
+		// 	root.scale.set(0.5,0.5,0.5);
+		// 	root.position.set(30,0,30)
+		// 	scene.add(root);
+		// 	console.log("loaded House")
+		// 	// fitCameraToObject(camera, root, 15);
+		// });
 	
 	
 		const gltfLoader = new GLTFLoader();
-		const url = '../models/gltf/ceiling_lamp/scene.gltf';
+		const url = './models/gltf/RoomHouse.gltf';
 		gltfLoader.load(url, (gltf) => 
 		{
 			const root = gltf.scene;
 			root.traverse( function ( child ) 
 			{
+				var childname = child.name;
+				console.log(childname);
+				if(childname === "Floor")
+				{
+					child.material = floor_mat;
+				}
+				else if(childname === "GlassWindow")
+				{
+					child.material = glass_mat;
+				}
+				else if(childname === "Wall")
+				{
+					child.material = wall_mat;
+				}
+				else if(childname === "Wall")
+				{
+					child.material = wall_mat;
+				}
+				else if(childname === "FloorSurface")
+				{
+					child.material = floor_mat;
+				}
 
 			});
-			root.scale.set(5,5,5);
-			root.position.set( 0, 51, -30 );
+			// root.scale.set(5,5,5);
 			scene.add(root);
 			fitCameraToObject(camera, root, 15);
 		});
