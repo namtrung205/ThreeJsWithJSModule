@@ -110,11 +110,11 @@ var material = new THREE.MeshPhysicalMaterial( {
 //GlassMat
 var glass_mat = new THREE.MeshPhysicalMaterial( {
 	color: 0xffffff,
-	roughness: 0.4,
+	roughness: 0.0,
 	aoMapIntensity : 0.1,
-	envMapIntensity: 1,
-	transmission: 0.5, // use material.transmission for glass materials
-	opacity: 1,  // set material.OPACITY to 1 when material.transmission is non-zero
+	envMapIntensity: 0.1,
+	transmission: 0.9, // use material.transmission for glass materials
+	opacity: 1,			// set material.OPACITY to 1 when material.transmission is non-zero
 	transparent: true,
 } );
 
@@ -219,11 +219,11 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 	map: map_text_floor,
 
 	roughnessMap:map_roughness_floor,
-	roughness : 0.4,
+	roughness : 0.2,
 
 	aoMap:map_aoMap_floor,
-	aoMapIntensity : 0.1, 
-	envMapIntensity: 0.3,
+	aoMapIntensity : 0.5, 
+	envMapIntensity: 0,
 
 	normalMap: map_normal_floor,
 	normalScale : new THREE.Vector2(0.5, 0.5),
@@ -293,8 +293,8 @@ scene.add( spot );
 
 //#region Light
 
-// var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.51);
-// scene.add(sunLight);
+var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.2);
+scene.add(sunLight);
 
 // var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
 // scene.add( aoLight );
@@ -349,9 +349,33 @@ scene.add( light_01 );
 light_01.shadow.mapSize.width = 1024;  // default
 light_01.shadow.mapSize.height = 1024; // default
 light_01.shadow.camera.near = 0.05;       // default
-light_01.shadow.camera.far = 300    // default
+light_01.shadow.camera.far = 3000    // default
 
-light_01.shadow.bias = -0.003;
+light_01.shadow.bias = -0.0001;
+
+
+//Create a DirectionalLight and turn on shadows for the light
+var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.6 );
+directionalLight.position.set( 20, 20, -20 ); 			//default; light shining from top
+directionalLight.castShadow = true;            // default false
+directionalLight.shadow.radius = 1;
+scene.add( directionalLight );
+
+
+//Set up shadow properties for the light
+directionalLight.shadow.bias = -0.00001;  
+directionalLight.shadow.mapSize.width = 1024;  // default
+directionalLight.shadow.mapSize.height = 1024; // default
+directionalLight.shadow.camera.near = 0.1;    // default
+directionalLight.shadow.camera.far = 10000;     // default
+
+const d = 15;
+directionalLight.shadow.camera.left = - d;
+directionalLight.shadow.camera.right = d;
+directionalLight.shadow.camera.top = d;
+directionalLight.shadow.camera.bottom = - d;
+
+scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
 
 //Create a sphere that cast shadows (but does not receive them)
 var light_01_geometry = new THREE.SphereBufferGeometry( 0.03, 32, 32 );
@@ -500,10 +524,10 @@ function init() {
 
 	// RectAreaLightUniformsLib.init();
 
-	// var rectLight = new THREE.RectAreaLight( 0xffffff, 60, 10, 10 );
-	// rectLight.position.set( 60, 56, 0 );
+	// var rectLight = new THREE.RectAreaLight( 0xffffff, 30, 6, 2.5 );
+	// rectLight.position.set( 6, 1.75, -1 );
 	// var quaternion = new THREE.Quaternion();
-	// quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0), -Math.PI / 2 );
+	// quaternion.setFromAxisAngle( new THREE.Vector3( 0, 1, 0), Math.PI / 2 );
 	// rectLight.applyQuaternion(quaternion)
 
 	// scene.add( rectLight );
@@ -512,7 +536,22 @@ function init() {
 	// rectLight.add( rectLightHelper );
 
 
-	loadModelWithHDR();
+
+	
+
+	const loader = new THREE.CubeTextureLoader();
+	const texture = loader.load([
+	  '../Libs/ThreeJs/textures/cube/Park2/posx.jpg',
+	  '../Libs/ThreeJs/textures/cube/Park2/negx.jpg',
+	  '../Libs/ThreeJs/textures/cube/Park2/posy.jpg',
+	  '../Libs/ThreeJs/textures/cube/Park2/negy.jpg',
+	  '../Libs/ThreeJs/textures/cube/Park2/posz.jpg',
+	  '../Libs/ThreeJs/textures/cube/Park2/negz.jpg',
+	]);
+	scene.background = texture;
+
+
+	// loadModelWithHDR();
 	readModel();
 
 	composer = new EffectComposer( renderer );
@@ -598,7 +637,7 @@ async function loadModelWithHDR() {
 	var rgbeLoader = new RGBELoader()
 		.setDataType( THREE.UnsignedByteType )
 		.setPath( '../Libs/ThreeJs/textures/equirectangular/' );
-	var [ texture] = await Promise.all( [rgbeLoader.loadAsync( 'winter_lake_01_4k.hdr' )] );
+	var [ texture] = await Promise.all( [rgbeLoader.loadAsync( 'shanghai_bund_4k.hdr' )] );
 	// environment
 	envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 	scene.background = envMap; //Not set bG
@@ -612,59 +651,59 @@ function readModel() {
 		// //FBXloader
 		const fbxLoader = new FBXLoader();
 
-		// //Load chair
-		// fbxLoader.load('../models/fbx/Chair/source/chair.fbx', (root) => {
-		// 	root.traverse( function ( child ) {
-		// 		child.castShadow = true;
-		// 		child.receiveShadow = true;
-		// 		if ( child instanceof THREE.Mesh ) 
-		// 		{
-		// 			if(
-		// 				child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
-		// 				child.name ==="polySurface47" || child.name ==="polySurface32")
-		// 			{
-		// 				child.material = platic_mat;
-		// 			}
-		// 			else if(child.name ==="polySurface46" || child.name ==="polySurface48" ||
-		// 					child.name ==="polySurface49" || child.name ==="polySurface50" )
-		// 			{
-		// 				child.material = leather_mat;
-		// 			}
-		// 			else if(
-		// 					child.name ==="polySurface44" || child.name ==="polySurface45" ||
-		// 					child.name ==="polySurface42" || child.name ==="polySurface43" ||
-		// 					child.name ==="polySurface51" || child.name === "polySurface16" ||
-		// 					child.name ==="polySurface27" ||  child.name ==="polySurface28" ||
-		// 					child.name ==="polySurface29" ||child.name ==="polySurface30" || 
-		// 					child.name ==="polySurface31")
-		// 			{
-		// 				child.material = wood_mat;
-		// 			}
-		// 		else if(
-		// 			child.name ==="polySurface19" || child.name ==="polySurface24" ||
-		// 			child.name ==="polySurface36" || child.name ==="polySurface37" ||
-		// 			child.name ==="polySurface38" || child.name ==="polySurface39" ||
-		// 			child.name ==="polySurface40" || child.name ==="polySurface41" ||
-		// 			child.name ==="polySurface34" || child.name ==="polySurface35" ||
-		// 			child.name ==="polySurface25" ||child.name ==="polySurface20"  ||
-		// 			child.name ==="polySurface26" || child.name ==="polySurface27" ||
-		// 			child.name ==="polySurface22" || child.name ==="polySurface23")
-		// 			{
-		// 				child.material = metal_mat;
-		// 				// child.visible = false;
-		// 			}
-		// 		}
-		// 		else
-		// 		{
-		// 			child.material = metal_mat;
-		// 		}
-		// 	} );
-		// 	root.name = "chair_model_root";
-		// 	scene.add(root);
-		// 	root.position.set(30,3.36,-45)
-		// 	fitCameraToObject(camera, root, 15);
-		// 	console.log("loaded Chair")
-		// });
+		//Load chair
+		fbxLoader.load('../models/fbx/Chair/source/chair.fbx', (root) => {
+			root.traverse( function ( child ) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+				if ( child instanceof THREE.Mesh ) 
+				{
+					if(
+						child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
+						child.name ==="polySurface47" || child.name ==="polySurface32")
+					{
+						child.material = platic_mat;
+					}
+					else if(child.name ==="polySurface46" || child.name ==="polySurface48" ||
+							child.name ==="polySurface49" || child.name ==="polySurface50" )
+					{
+						child.material = leather_mat;
+					}
+					else if(
+							child.name ==="polySurface44" || child.name ==="polySurface45" ||
+							child.name ==="polySurface42" || child.name ==="polySurface43" ||
+							child.name ==="polySurface51" || child.name === "polySurface16" ||
+							child.name ==="polySurface27" ||  child.name ==="polySurface28" ||
+							child.name ==="polySurface29" ||child.name ==="polySurface30" || 
+							child.name ==="polySurface31")
+					{
+						child.material = wood_mat;
+					}
+				else if(
+					child.name ==="polySurface19" || child.name ==="polySurface24" ||
+					child.name ==="polySurface36" || child.name ==="polySurface37" ||
+					child.name ==="polySurface38" || child.name ==="polySurface39" ||
+					child.name ==="polySurface40" || child.name ==="polySurface41" ||
+					child.name ==="polySurface34" || child.name ==="polySurface35" ||
+					child.name ==="polySurface25" ||child.name ==="polySurface20"  ||
+					child.name ==="polySurface26" || child.name ==="polySurface27" ||
+					child.name ==="polySurface22" || child.name ==="polySurface23")
+					{
+						child.material = metal_mat;
+						// child.visible = false;
+					}
+				}
+				else
+				{
+					child.material = metal_mat;
+				}
+			} );
+			root.name = "chair_model_root";
+			scene.add(root);
+			// root.position.set(30,3.36,-45)
+			fitCameraToObject(camera, root, 15);
+			console.log("loaded Chair")
+		});
 	
 		// //Load House
 		// fbxLoader.load('../models/fbx/House/HouseModel.fbx', (root) => {
@@ -718,6 +757,8 @@ function readModel() {
 			{
 				var childname = child.name;
 				console.log(childname);
+				child.castShadow = true;
+				child.receiveShadow = true;
 				if(childname === "Floor")
 				{
 					child.material = floor_mat;
@@ -725,6 +766,7 @@ function readModel() {
 				else if(childname === "GlassWindow")
 				{
 					child.material = glass_mat;
+					child.castShadow = false;
 				}
 				else if(childname === "Wall")
 				{
@@ -737,12 +779,14 @@ function readModel() {
 				else if(childname === "FloorSurface")
 				{
 					child.material = floor_mat;
+					child.revi
 				}
 
 			});
-			// root.scale.set(5,5,5);
+			// root.scale.set(0.22, 0.22, 0.22);
+			root.rotateY(-3.14/2);
 			scene.add(root);
-			fitCameraToObject(camera, root, 15);
+			// fitCameraToObject(camera, root, 15);
 		});
 	
 	}
