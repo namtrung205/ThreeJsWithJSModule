@@ -551,7 +551,7 @@ function init() {
 	scene.background = texture;
 
 
-	// loadModelWithHDR();
+	loadModelWithHDR();
 	readModel();
 
 	composer = new EffectComposer( renderer );
@@ -640,7 +640,7 @@ async function loadModelWithHDR() {
 	var [ texture] = await Promise.all( [rgbeLoader.loadAsync( 'shanghai_bund_4k.hdr' )] );
 	// environment
 	envMap = pmremGenerator.fromEquirectangular( texture ).texture;
-	scene.background = envMap; //Not set bG
+	// scene.background = envMap; //Not set bG
 	scene.environment = envMap;
 	texture.dispose();
 	pmremGenerator.dispose();
@@ -705,49 +705,6 @@ function readModel() {
 			console.log("loaded Chair")
 		});
 	
-		// //Load House
-		// fbxLoader.load('../models/fbx/House/HouseModel.fbx', (root) => {
-		// 	root.traverse( function ( child ) {
-		// 		console.log(child.name)
-		// 		child.castShadow = true;
-		// 		child.receiveShadow = true;
-		// 		if(child.name === "FloorSurface")
-		// 		{
-		// 			child.material = floor_mat;
-		// 			controls.ground.push( child );
-		// 		}
-		// 		else if(child.name === "GlassDoor")
-		// 		{
-		// 			child.material = glass_mat;
-		// 			child.material.emissive = 2;
-		// 			child.castShadow = false;
-		// 		}
-		// 		else if(child.name === "wall")
-		// 		{
-		// 			child.material = wall_mat;
-		// 		}
-		// 		else if(child.name === "Side")
-		// 		{
-		// 			child.material = wall_mat;
-		// 		}
-		// 		else if(child.name === "roof")
-		// 		{
-		// 			child.material = side_mat;
-		// 		}
-		// 		else if(child.name === "ceiling")
-		// 		{
-		// 			child.material = side_mat;
-
-		// 		}
-		// 	} );
-		// 	root.scale.set(0.5,0.5,0.5);
-		// 	root.position.set(30,0,30)
-		// 	scene.add(root);
-		// 	console.log("loaded House")
-		// 	// fitCameraToObject(camera, root, 15);
-		// });
-	
-	
 		const gltfLoader = new GLTFLoader();
 		const url = './models/gltf/RoomHouse.gltf';
 		gltfLoader.load(url, (gltf) => 
@@ -759,7 +716,7 @@ function readModel() {
 				console.log(childname);
 				child.castShadow = true;
 				child.receiveShadow = true;
-				if(childname === "Floor")
+				if(childname === "Floor" || childname === "DoorFrame" || childname === "Door")
 				{
 					child.material = floor_mat;
 				}
@@ -768,11 +725,7 @@ function readModel() {
 					child.material = glass_mat;
 					child.castShadow = false;
 				}
-				else if(childname === "Wall")
-				{
-					child.material = wall_mat;
-				}
-				else if(childname === "Wall")
+				else if(childname === "WallBedroom")
 				{
 					child.material = wall_mat;
 				}
