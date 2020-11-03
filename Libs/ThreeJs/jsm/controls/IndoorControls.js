@@ -222,7 +222,7 @@ var IndoorControls = function ( camera, domElement, scene ) {
 			raycaster.setFromCamera( mouse, scope.camera );
 
 			// 计算物体和射线的交点信息
-			intersects = raycaster.intersectObjects( scope.scene.children, true );
+			intersects = raycaster.intersectObjects( scope.ground, true );
 
 			// 触发鼠标在地面时的移动事件
 			if ( intersects.length > 0 ) {

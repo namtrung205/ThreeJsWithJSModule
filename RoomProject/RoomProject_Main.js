@@ -273,7 +273,7 @@ var platic_mat = new THREE.MeshPhysicalMaterial( {  map: map_text_platic,  norma
 
 //#region Spot Geo
 var spot_mat = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.1} );
-var spot_geometry = new THREE.CircleGeometry( 2, 32 );
+var spot_geometry = new THREE.CircleGeometry( 0.2, 32 );
 var spot = new THREE.Mesh( spot_geometry, spot_mat );
 
 var quaternion = new THREE.Quaternion();
@@ -283,7 +283,7 @@ spot.name = "spot_camera_pointer"
 spot.visible = false;
 
 let ringMaterial = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.9} );
-let ringGeometry = new THREE.RingBufferGeometry( 2.0, 2.4, 32 );
+let ringGeometry = new THREE.RingBufferGeometry( 0.2, 0.24, 32 );
 let ring = new THREE.Mesh( ringGeometry, ringMaterial );
 spot.add( ring );
 
@@ -386,8 +386,8 @@ scene.add( light_01_object );
 
 
 //Create a helper for the shadow camera (optional)
-var helper = new THREE.CameraHelper( light_01.shadow.camera );
-scene.add( helper );
+// var helper = new THREE.CameraHelper( light_01.shadow.camera );
+// scene.add( helper );
 
 
 
@@ -414,9 +414,8 @@ function checkIntersection()
 			if(selectedObject.name === "FloorSurface")
 			{
 				outlinePass.selectedObjects = [];
-				// spot.visible = false;
 			}
-			if(selectedObject.name !== "spot_camera_pointer" )
+			else if(selectedObject.name !== "spot_camera_pointer" )
 			{
 				addSelectedObject( selectedObject );
 				outlinePass.selectedObjects = selectedObjects;
@@ -425,7 +424,6 @@ function checkIntersection()
 	} 
 	else {
 		outlinePass.selectedObjects = [];
-		// spot.visible = false;
 	}
 }
 
@@ -457,7 +455,7 @@ function fadeIn(element) {
 
 function onMousedblClick( event ) {
 
-	console.log(outlinePass.selectedObjects);
+	// console.log(outlinePass.selectedObjects);
 
 	if(outlinePass.selectedObjects.length === 0)
 	{
@@ -587,40 +585,15 @@ function init() {
 	// controls.ground.push( floor_plane );
 	controls.addEventListener( 'move', function ( event ) 
 	{
-		// console.log(controls.ground);
 		let intersect = event.intersect;
 		// console.log(intersect);
-		console.log(intersect.object.name);
-		if(intersect.object.name === "FloorSurface")
+		// console.log(intersect.object.name);
+		if(intersect.object.name === "FloorSurface" && outlinePass.selectedObjects.length === 0)
 		{
-
 			spot.visible = true;
-
-			console.log("interPoint: ")
-			console.log(intersect.point );
 			spot.position.set( intersect.point.x, intersect.point.y + 0.05, intersect.point.z );
-			console.log("Spot: ")
-			console.log(spot.position );
 			// spot.position.addScaledVector( normal, 0.001 );
 			controls.enabled_move = true;
-
-
-			// let normal = intersect.face.normal;
-			// if ( normal.z !== 1) 
-			// {
-			// 	spot.visible = false;
-			// 	controls.enabled_move = false;
-			// } else {
-			// 	spot.visible = true;
-
-			// 	console.log("interPoint: ")
-			// 	console.log(intersect.point );
-			// 	spot.position.set( intersect.point.x, intersect.point.y + 0.1, intersect.point.z );
-			// 	console.log("Spot: ")
-			// 	console.log(spot.position );
-			// 	spot.position.addScaledVector( normal, 0.001 );
-			// 	controls.enabled_move = true;
-			// }
 		}
 		else
 		{
@@ -628,10 +601,6 @@ function init() {
 			controls.enabled_move = false;
 		}
 	} );
-
-
-
-
 }
 
 async function loadModelWithHDR() {
@@ -733,7 +702,8 @@ function readModel() {
 				else if(childname === "FloorSurface")
 				{
 					child.material = floor_mat;
-					child.revi
+					controls.ground.push(child);
+					console.log("Add Floor to ground");
 				}
 
 			});
