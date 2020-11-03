@@ -80,29 +80,13 @@ var mouse = new THREE.Vector2();
 var selectedObjects = [];
 var composer, effectFXAA, outlinePass, saoPass, bloomPass;
 var material_select_container  = document.getElementById( 'material_container' );
+material_select_container.style.opacity = 0;
 var envMap;
 
 
 //#region Material
 //Texture Loader
 var tex_loader = new THREE.TextureLoader();
-
-//Test Material
-var textureLoader = new THREE.TextureLoader();
-var normalMap2 = textureLoader.load( "../Libs/ThreeJs/textures/water/Water_1_M_Normal.jpg" );
-var clearcoatNormaMap = textureLoader.load( "../Libs/ThreeJs/textures/pbr/Scratched_gold/Scratched_gold_01_1K_Normal.png" );
-var geometry = new THREE.SphereBufferGeometry( 30, 32, 32 );
-var material = new THREE.MeshPhysicalMaterial( {
-	clearcoat: 1.0,
-	metalness: 0.2,
-	// color: 0xff0000,
-	normalMap: normalMap2,
-	normalScale: new THREE.Vector2( 0.15, 0.15 ),
-	clearcoatNormalMap: clearcoatNormaMap,
-
-	// y scale is negated to compensate for normal map handedness.
-	clearcoatNormalScale: new THREE.Vector2( 2.0, - 2.0 )
-} );
 
 
 //#region Floor Mat
@@ -121,14 +105,12 @@ var glass_mat = new THREE.MeshPhysicalMaterial( {
 var light_mat = new THREE.MeshPhysicalMaterial( {
 	color: 0xffffff,
 	roughness: 0.4,
-
 	emissive : 0xffffff,
 	emissiveIntensity : 30,
 } );
 
 
 //Wall Material
-//Map wall 1 D:\DEV\WebGL\ThreeJS\ThreeJsWithJsModule\ThreeJsWithJSModule\models\fbx\house\Texture\smooth-stucco-ue\smooth-stucco-albedo.png
 var map_text_wall = tex_loader.load( '../models/fbx/house/texture/smooth-stucco-ue/smooth-stucco-albedo.png' );
 map_text_wall.wrapS = THREE.RepeatWrapping;
 map_text_wall.wrapT = THREE.RepeatWrapping;
@@ -163,31 +145,6 @@ var wall_mat = new THREE.MeshPhysicalMaterial( {
 	envMapIntensity: 0.5,
 	side: THREE.DoubleSide} );
 
-//Roof Material
-var roof_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0x40ffff,
-	metalness: 0,
-	roughness: 0.3,
-	// alphaMap: texture,
-	alphaTest: 0.5,
-	envMap: envMap,
-	envMapIntensity: 0.2,
-	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
-	side: THREE.DoubleSide,
-} );
-
-
-var side_mat = new THREE.MeshPhysicalMaterial( {
-	color: 0xffffff,
-	metalness: 0,
-	roughness: 0.1,
-	// alphaMap: texture,
-	alphaTest: 0.6,
-	envMap: envMap,
-	envMapIntensity: 0.3,
-	opacity: 1,  // set material.opacity to 1 when material.transmission is non-zero
-	side: THREE.DoubleSide,
-} );
 
 //Map floor 1 ThreeJsWithJSModule\models\fbx\house\narrow-floorboards1-albedo.png
 var map_text_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_COLOR.jpg' );
@@ -235,39 +192,6 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 	side: THREE.DoubleSide} );
 
 //#endregion
-
-//#region  Spot Material
-
-
-//#endregion
-
-
-//#region Chair Material
-
-//Leather
-var map_text_leather = tex_loader.load( '../models/fbx/Chair/textures/chair_leather_BaseColor.jpg' );
-var map_normal_leather = tex_loader.load( '../models/fbx/Chair/textures/chair_leather_Normal.jpg' );
-//metal
-var map_text_metal = tex_loader.load( '../models/fbx/Chair/textures/chair_metal_BaseColor.jpg' );
-var map_metalness_metal = tex_loader.load( '../models/fbx/Chair/textures/chair_metal_Roughness.jpg' );
-var map_rounghness_metal = tex_loader.load( '../models/fbx/Chair/textures/chair_metal_Roughness.jpg' );
-//Wood
-var map_text_wood = tex_loader.load( '../models/fbx/Chair/textures/chair_wood_BaseColor.jpg' );
-var map_normal_wood= tex_loader.load( '../models/fbx/Chair/textures/chair_wood_Normal.jpg' );
-var map_rounghness_wood = tex_loader.load( '../models/fbx/Chair/textures/chair_wood_Roughness.jpg' );
-//platic
-var map_text_platic = tex_loader.load( '../models/fbx/Chair/textures/chair_plastic_BaseColor.jpg' );
-var map_normal_platic = tex_loader.load( '../models/fbx/Chair/textures/chair_plastic_Normal.jpg' );
-var map_rounghness_platic = tex_loader.load( '../models/fbx/Chair/textures/chair_plastic_Roughness.jpg' );
-
-//Material
-var leather_mat = new THREE.MeshPhysicalMaterial( { map: map_text_leather,  normalMap: map_normal_leather } );
-var metal_mat = new THREE.MeshPhysicalMaterial( { map: map_text_metal,  metalnessMap:map_metalness_metal, roughnessMap:map_rounghness_metal } );
-var wood_mat = new THREE.MeshPhysicalMaterial( { map: map_text_wood,  normalMap:map_normal_wood, roughnessMap:map_rounghness_wood } );
-var platic_mat = new THREE.MeshPhysicalMaterial( {  map: map_text_platic,  normalMap:map_normal_platic, roughnessMap:map_rounghness_platic} );
-
-//#endregion
-
 //#endregion
 
 
@@ -283,10 +207,9 @@ spot.name = "spot_camera_pointer"
 spot.visible = false;
 
 let ringMaterial = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.9} );
-let ringGeometry = new THREE.RingBufferGeometry( 0.2, 0.24, 32 );
+let ringGeometry = new THREE.RingBufferGeometry( 0.2, 0.22, 32 );
 let ring = new THREE.Mesh( ringGeometry, ringMaterial );
 spot.add( ring );
-
 scene.add( spot );
 
 //#endregion
@@ -295,46 +218,8 @@ scene.add( spot );
 
 // var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.8);
 // scene.add(sunLight);
-
 var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
 scene.add( aoLight );
-
-// var pointLight_01 = new THREE.PointLight( 0xffffff, 0.8);
-// pointLight_01.position.set( 0, 30, -30 );
-// scene.add( pointLight_01 );
-
-
-// //Set up shadow properties for the light
-// pointLight_01.shadow.mapSize.width = 1024;  // default
-// pointLight_01.shadow.mapSize.height = 1024; // default
-// pointLight_01.shadow.camera.near = 0.1;    // default
-// pointLight_01.shadow.camera.far = 500;     // default
-// light.shadow.camera = new THREE.OrthographicCamera( -100, 100, 100, -100, 0.5, 1000 ); 
-
-
-// //Create a DirectionalLight and turn on shadows for the light
-// var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-// directionalLight.position.set( -180, 100, 0 ); 			//default; light shining from top
-// directionalLight.castShadow = true;            // default false
-// directionalLight.shadow.radius = 100;
-// scene.add( directionalLight );
-
-// //Set up shadow properties for the light
-// directionalLight.shadow.bias = -0.001;  
-// directionalLight.shadow.mapSize.width = 4096;  // default
-// directionalLight.shadow.mapSize.height = 4096; // default
-// directionalLight.shadow.camera.near = 0.1;    // default
-// directionalLight.shadow.camera.far = 5000;     // default
-
-
-// const d = 300;
-// directionalLight.shadow.camera.left = - d;
-// directionalLight.shadow.camera.right = d;
-// directionalLight.shadow.camera.top = d;
-// directionalLight.shadow.camera.bottom = - d;
-
-
-// scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
 //#endregion
 
 //Test light
@@ -352,15 +237,24 @@ light_01.shadow.camera.near = 0.05;       // default
 light_01.shadow.camera.far = 300    // default
 
 light_01.shadow.bias = -0.0001;
+//Create a helper for the shadow camera (optional)
+// var helper = new THREE.CameraHelper( light_01.shadow.camera );
+// scene.add( helper );
+
+//Create a sphere that cast shadows (but does not receive them)
+var light_01_geometry = new THREE.SphereBufferGeometry( 0.03, 32, 32 );
+var light_01_object = new THREE.Mesh( light_01_geometry, light_mat );
+light_01_object.position.set( 0, 2.5, 0 );
+light_01_object.name = "light_01";
+scene.add( light_01_object );
 
 
 //Create a DirectionalLight and turn on shadows for the light
 var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.6 );
-directionalLight.position.set( 20, 20, -20 ); 			//default; light shining from top
+directionalLight.position.set( 20, 20, -20 ); 	//default; light shining from top
 directionalLight.castShadow = true;            // default false
 directionalLight.shadow.radius = 1;
 // scene.add( directionalLight );
-
 
 //Set up shadow properties for the light
 directionalLight.shadow.bias = -0.00001;  
@@ -376,20 +270,6 @@ directionalLight.shadow.camera.top = d;
 directionalLight.shadow.camera.bottom = - d;
 
 // scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
-
-//Create a sphere that cast shadows (but does not receive them)
-var light_01_geometry = new THREE.SphereBufferGeometry( 0.03, 32, 32 );
-var light_01_object = new THREE.Mesh( light_01_geometry, light_mat );
-light_01_object.position.set( 0, 2.5, 0 );
-light_01_object.name = "light_01";
-scene.add( light_01_object );
-
-
-//Create a helper for the shadow camera (optional)
-// var helper = new THREE.CameraHelper( light_01.shadow.camera );
-// scene.add( helper );
-
-
 
 
 function addSelectedObject( object ) 
@@ -422,7 +302,8 @@ function checkIntersection()
 			}
 		}
 	} 
-	else {
+	else 
+	{
 		outlinePass.selectedObjects = [];
 	}
 }
@@ -703,9 +584,11 @@ function readModel() {
 				{
 					child.material = floor_mat;
 					controls.ground.push(child);
-					console.log("Add Floor to ground");
 				}
-
+				else if(childname === "WallBedRoom" || childname === "Wall")
+				{
+					child.material = wall_mat;
+				}
 			});
 			// root.scale.set(0.22, 0.22, 0.22);
 			root.rotateY(-3.14/2);
