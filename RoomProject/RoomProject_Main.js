@@ -84,12 +84,13 @@ material_select_container.style.opacity = 0;
 var envMap;
 
 
+
+var lockSelectObjects = false;
 var list_root_item_object_name = 
-{
-
-
-
-}
+[
+	"Wall",
+	"FloorSurface"
+]
 
 //#region Material
 //Texture Loader
@@ -288,12 +289,12 @@ function checkIntersection()
 		{
 			if(selectedObject.name === "FloorSurface")
 			{
-				outlinePass.selectedObjects = [];
+				selectedObjects = [];
+				
 			}
 			else if(selectedObject.name !== "spot_camera_pointer" )
 			{
 				addSelectedObject( selectedObject );
-				outlinePass.selectedObjects = selectedObjects;
 			}
 		}
 	} 
@@ -301,6 +302,7 @@ function checkIntersection()
 	{
 		outlinePass.selectedObjects = [];
 	}
+	outlinePass.selectedObjects = selectedObjects;
 }
 
 function fadeOut(element) {
@@ -332,12 +334,13 @@ function fadeIn(element) {
 function onMousedblClick( event ) 
 {
 	// console.log(outlinePass.selectedObjects);
-	if(outlinePass.selectedObjects.length === 0)
+	if(outlinePass.selectedObjects.length === 0 || lockSelectObjects)
 	{
-		fadeOut(material_select_container);
+		return;
 	}
 	else
 	{
+		lockSelectObjects = true;
 		fadeIn(material_select_container);
 		if(outlinePass.selectedObjects[0] === light_01_object)
 		{
@@ -352,11 +355,38 @@ function onMousedblClick( event )
 				light_01_object.material = light_mat;
 			}
 		}
+
+		// fitCameraToObject(camera, outlinePass.selectedObjects[0], 1);
 	}
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 }
+
+window.oncontextmenu = function ()
+{
+    return false;     // cancel default menu
+}
+
+document.body.onmousedown = function (e) {
+    var isRightMB;
+    e = e || window.event;
+
+	console.log(e);
+
+    if ("which" in e)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+        isRightMB = e.which == 3; 
+    else if ("button" in e)  // IE, Opera 
+        isRightMB = e.button == 2; 
+
+	console.log("isRMB : " + isRightMB);
+	if(isRightMB)
+	{
+		fadeOut(material_select_container);
+		lockSelectObjects = false;
+	}
+
+} 
 
 
 function onMouseMove( event ) 
@@ -364,7 +394,15 @@ function onMouseMove( event )
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-	checkIntersection();
+	if(!lockSelectObjects)
+	{
+		console.log("unlocking select object")
+		checkIntersection();
+	}
+	else
+	{
+		console.log("locking select object")
+	}
 }
 
 function onMouseClickMaterialItem(event) {
@@ -561,7 +599,7 @@ function fitCameraToObject( camera, object, offset ) {
 						((size.y/2)+offset) / Math.abs(Math.tan(camera.fov/2)) / camera.aspect ;
 		camera.position.set(
 		camera.position.x * endDistance / startDistance,
-		camera.position.y * endDistance / startDistance+ 2,
+		camera.position.y * endDistance / startDistance,
 		camera.position.z * endDistance / startDistance ,
 		);
 	camera.lookAt(center);
