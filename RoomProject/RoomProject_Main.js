@@ -84,6 +84,13 @@ material_select_container.style.opacity = 0;
 var envMap;
 
 
+var list_root_item_object_name = 
+{
+
+
+
+}
+
 //#region Material
 //Texture Loader
 var tex_loader = new THREE.TextureLoader();
@@ -136,7 +143,6 @@ var wall_mat = new THREE.MeshPhysicalMaterial( {
 	map: map_text_wall,
 	normalMap: map_normal_wall,
 	roughnessMap:map_roughness_wall,
-	// displacementMap: map_displacementMap_wall ,
 	aoMap:map_aoMap_wall,
 	metalness: 0.0,
 	normalScale: new THREE.Vector2( 0.1, 0.1 ),
@@ -161,11 +167,6 @@ map_roughness_floor.wrapS = THREE.RepeatWrapping;
 map_roughness_floor.wrapT = THREE.RepeatWrapping;
 
 
-var map_displacementMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_DISP.jpg');
-map_displacementMap_floor.wrapS = THREE.RepeatWrapping;
-map_displacementMap_floor.wrapT = THREE.RepeatWrapping;
-
-
 
 var map_aoMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_OCC.jpg');
 map_aoMap_floor.wrapS = THREE.RepeatWrapping;
@@ -174,8 +175,7 @@ map_aoMap_floor.wrapT = THREE.RepeatWrapping;
 
 var floor_mat = new THREE.MeshPhysicalMaterial( { 
 	map: map_text_floor,
-
-	// roughnessMap:map_roughness_floor,
+	roughnessMap:map_roughness_floor,
 	roughness : 1,
 
 	aoMap:map_aoMap_floor,
@@ -193,7 +193,6 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 
 //#endregion
 //#endregion
-
 
 //#region Spot Geo
 var spot_mat = new THREE.MeshPhysicalMaterial( {side: THREE.DoubleSide, transparent: true, opacity: 0.1} );
@@ -271,7 +270,6 @@ directionalLight.shadow.camera.bottom = - d;
 
 // scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
 
-
 function addSelectedObject( object ) 
 {
 	selectedObjects = [];
@@ -281,13 +279,10 @@ function addSelectedObject( object )
 function checkIntersection() 
 {
 	raycaster.setFromCamera( mouse, camera );
-
 	var intersects = raycaster.intersectObject( scene, true );
-
 	if ( intersects.length > 0 ) 
 	{
 		var selectedObject = intersects[ 0 ].object;
-
 		//Check if plan, get point to move
 		if(selectedObject)
 		{
@@ -334,19 +329,16 @@ function fadeIn(element) {
     }, 10);
 }
 
-function onMousedblClick( event ) {
-
+function onMousedblClick( event ) 
+{
 	// console.log(outlinePass.selectedObjects);
-
 	if(outlinePass.selectedObjects.length === 0)
 	{
 		fadeOut(material_select_container);
-		console.log("Hide element");
 	}
 	else
 	{
 		fadeIn(material_select_container);
-
 		if(outlinePass.selectedObjects[0] === light_01_object)
 		{
 			if(light_01.intensity > 0)
@@ -360,8 +352,6 @@ function onMousedblClick( event ) {
 				light_01_object.material = light_mat;
 			}
 		}
-
-		console.log("Show element");
 	}
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -378,10 +368,8 @@ function onMouseMove( event )
 }
 
 function onMouseClickMaterialItem(event) {
-	console.log(event.target.id);
+	console.log(selectedObjects);
 }
-
-
 
 //Add Event for material iamge
 var material_iamge_items = document.getElementsByClassName("material_item_image");
@@ -401,8 +389,8 @@ render();
 function init() {
 	// MODEL
 
+	///Rectangle Light
 	// RectAreaLightUniformsLib.init();
-
 	// var rectLight = new THREE.RectAreaLight( 0xffffff, 30, 6, 2.5 );
 	// rectLight.position.set( 6, 1.75, -1 );
 	// var quaternion = new THREE.Quaternion();
@@ -415,17 +403,14 @@ function init() {
 	// rectLight.add( rectLightHelper );
 
 
-
-	
-
 	const loader = new THREE.CubeTextureLoader();
 	const texture = loader.load([
-	  '../Libs/ThreeJs/textures/cube/Park2/posx.jpg',
-	  '../Libs/ThreeJs/textures/cube/Park2/negx.jpg',
-	  '../Libs/ThreeJs/textures/cube/Park2/posy.jpg',
-	  '../Libs/ThreeJs/textures/cube/Park2/negy.jpg',
-	  '../Libs/ThreeJs/textures/cube/Park2/posz.jpg',
-	  '../Libs/ThreeJs/textures/cube/Park2/negz.jpg',
+		'../Libs/ThreeJs/textures/cube/Park2/posx.jpg',
+		'../Libs/ThreeJs/textures/cube/Park2/negx.jpg',
+		'../Libs/ThreeJs/textures/cube/Park2/posy.jpg',
+		'../Libs/ThreeJs/textures/cube/Park2/negy.jpg',
+		'../Libs/ThreeJs/textures/cube/Park2/posz.jpg',
+		'../Libs/ThreeJs/textures/cube/Park2/negz.jpg',
 	]);
 	scene.background = texture;
 
@@ -467,13 +452,10 @@ function init() {
 	controls.addEventListener( 'move', function ( event ) 
 	{
 		let intersect = event.intersect;
-		// console.log(intersect);
-		// console.log(intersect.object.name);
 		if(intersect.object.name === "FloorSurface" && outlinePass.selectedObjects.length === 0)
 		{
 			spot.visible = true;
 			spot.position.set( intersect.point.x, intersect.point.y + 0.05, intersect.point.z );
-			// spot.position.addScaledVector( normal, 0.001 );
 			controls.enabled_move = true;
 		}
 		else
@@ -503,62 +485,6 @@ async function loadModelWithHDR() {
 
 function readModel() {
 		// //FBXloader
-		const fbxLoader = new FBXLoader();
-
-		// //Load chair
-		// fbxLoader.load('../models/fbx/Chair/source/chair.fbx', (root) => {
-		// 	root.traverse( function ( child ) {
-		// 		child.castShadow = true;
-		// 		child.receiveShadow = true;
-		// 		if ( child instanceof THREE.Mesh ) 
-		// 		{
-		// 			if(
-		// 				child.name ==="polySurface33" || child.name ==="polySurface18" || child.name ==="polySurface17" ||
-		// 				child.name ==="polySurface47" || child.name ==="polySurface32")
-		// 			{
-		// 				child.material = platic_mat;
-		// 			}
-		// 			else if(child.name ==="polySurface46" || child.name ==="polySurface48" ||
-		// 					child.name ==="polySurface49" || child.name ==="polySurface50" )
-		// 			{
-		// 				child.material = leather_mat;
-		// 			}
-		// 			else if(
-		// 					child.name ==="polySurface44" || child.name ==="polySurface45" ||
-		// 					child.name ==="polySurface42" || child.name ==="polySurface43" ||
-		// 					child.name ==="polySurface51" || child.name === "polySurface16" ||
-		// 					child.name ==="polySurface27" ||  child.name ==="polySurface28" ||
-		// 					child.name ==="polySurface29" ||child.name ==="polySurface30" || 
-		// 					child.name ==="polySurface31")
-		// 			{
-		// 				child.material = wood_mat;
-		// 			}
-		// 		else if(
-		// 			child.name ==="polySurface19" || child.name ==="polySurface24" ||
-		// 			child.name ==="polySurface36" || child.name ==="polySurface37" ||
-		// 			child.name ==="polySurface38" || child.name ==="polySurface39" ||
-		// 			child.name ==="polySurface40" || child.name ==="polySurface41" ||
-		// 			child.name ==="polySurface34" || child.name ==="polySurface35" ||
-		// 			child.name ==="polySurface25" ||child.name ==="polySurface20"  ||
-		// 			child.name ==="polySurface26" || child.name ==="polySurface27" ||
-		// 			child.name ==="polySurface22" || child.name ==="polySurface23")
-		// 			{
-		// 				child.material = metal_mat;
-		// 				// child.visible = false;
-		// 			}
-		// 		}
-		// 		else
-		// 		{
-		// 			child.material = metal_mat;
-		// 		}
-		// 	} );
-		// 	root.name = "chair_model_root";
-		// 	scene.add(root);
-		// 	// root.position.set(30,3.36,-45)
-		// 	fitCameraToObject(camera, root, 15);
-		// 	console.log("loaded Chair")
-		// });
-	
 		const gltfLoader = new GLTFLoader();
 		const url = './models/gltf/RoomHouse.gltf';
 		// const url = '../models/gltf/Rooms/livingtable/scene.gltf';
@@ -607,24 +533,6 @@ function readModel() {
 				console.log(childname);
 				child.castShadow = true;
 				child.receiveShadow = true;
-				if(childname === "Floor")
-				{
-					child.material = floor_mat;
-				}
-				else if(childname === "GlassWindow")
-				{
-					child.material = glass_mat;
-					child.castShadow = false;
-				}
-				else if(childname === "FloorSurface")
-				{
-					child.material = floor_mat;
-				}
-				else if(childname === "WallBedRoom")
-				{
-					child.material = wall_mat;
-				}
-
 			});
 			root.scale.set(1/175, 1/175, 1/175);
 			root.position.set(-0.2, 0.48, -0.6);
@@ -632,10 +540,6 @@ function readModel() {
 			scene.add(root);
 			fitCameraToObject(camera, root, 1);
 		});
-	
-
-
-
 	}
 
 function fitCameraToObject( camera, object, offset ) {
