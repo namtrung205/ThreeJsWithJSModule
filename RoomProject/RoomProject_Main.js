@@ -80,6 +80,8 @@ var mouse = new THREE.Vector2();
 var selectedObjects = [];
 var composer, effectFXAA, outlinePass, saoPass, bloomPass;
 var material_select_container  = document.getElementById( 'material_container' );
+var infor_select_container  = document.getElementById( 'modalQuickView' );
+
 material_select_container.style.opacity = 0;
 var envMap;
 
@@ -341,6 +343,7 @@ function onMousedblClick( event )
 	else
 	{
 		lockSelectObjects = true;
+		$('#modalQuickView').modal('toggle');
 		fadeIn(material_select_container);
 		if(outlinePass.selectedObjects[0] === light_01_object)
 		{
@@ -356,7 +359,7 @@ function onMousedblClick( event )
 			}
 		}
 
-		// fitCameraToObject(camera, outlinePass.selectedObjects[0], 1);
+		// fitCameraToObject(camera, outlinePass.selectedObjects[0], 0.5);
 	}
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -576,7 +579,7 @@ function readModel() {
 			root.position.set(-0.2, 0.48, -0.6);
 			// root.rotateY(-3.14/2);
 			scene.add(root);
-			fitCameraToObject(camera, root, 1);
+			fitCameraToObject(camera, root, 0.3);
 		});
 	}
 
@@ -599,7 +602,7 @@ function fitCameraToObject( camera, object, offset ) {
 						((size.y/2)+offset) / Math.abs(Math.tan(camera.fov/2)) / camera.aspect ;
 		camera.position.set(
 		camera.position.x * endDistance / startDistance,
-		camera.position.y * endDistance / startDistance,
+		camera.position.y * endDistance / startDistance + 1.5,
 		camera.position.z * endDistance / startDistance ,
 		);
 	camera.lookAt(center);
