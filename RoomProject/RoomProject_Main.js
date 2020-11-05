@@ -308,6 +308,7 @@ function checkIntersection()
 }
 
 function fadeOut(element) {
+	$('#modalQuickView').modal('toggle');
     var op = 1;  // initial opacity
     var timer = setInterval(function () {
         if (op <= 0.1){
@@ -321,6 +322,7 @@ function fadeOut(element) {
 }
 
 function fadeIn(element) {
+	$('#modalQuickView').modal('toggle');
     var op = 0.1;  // initial opacity
     element.style.display = 'block';
     var timer = setInterval(function () {
@@ -343,7 +345,6 @@ function onMousedblClick( event )
 	else
 	{
 		lockSelectObjects = true;
-		$('#modalQuickView').modal('toggle');
 		fadeIn(material_select_container);
 		if(outlinePass.selectedObjects[0] === light_01_object)
 		{
