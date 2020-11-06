@@ -180,8 +180,8 @@ var floor_mat = new THREE.MeshPhysicalMaterial( {
 	// roughnessMap:map_roughness_floor,
 	roughness : 1,
 
-	// aoMap:map_aoMap_floor,
-	aoMapIntensity : 0.02, 
+	aoMap:map_aoMap_floor,
+	aoMapIntensity : 0.1, 
 	envMapIntensity: 0.0,
 
 	// normalMap: map_normal_floor,
@@ -217,10 +217,10 @@ scene.add( spot );
 
 //#region Light
 
-// var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.8);
-// scene.add(sunLight);
-var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
-scene.add( aoLight );
+var sunLight  = new THREE.HemisphereLight(0xffffff, 0x000000, 0.8);
+scene.add(sunLight);
+// var aoLight = new THREE.AmbientLight( 0x808080 ); // soft white light
+// scene.add( aoLight );
 //#endregion
 
 //Test light
@@ -228,7 +228,7 @@ scene.add( aoLight );
 //Create a PointLight and turn on shadows for the light
 var light_01 = new THREE.PointLight( 0xffffff, 1, 1000 );
 light_01.position.set( 4.1, 2, -0.2 );
-light_01.castShadow = true;            // default false
+// light_01.castShadow = true;            // default false
 scene.add( light_01 );
 
 //Set up shadow properties for the light
@@ -253,7 +253,7 @@ scene.add( light_01_object );
 //Create a DirectionalLight and turn on shadows for the light
 var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.6 );
 directionalLight.position.set( 20, 20, -20 ); 	//default; light shining from top
-directionalLight.castShadow = true;            // default false
+// directionalLight.castShadow = true;            // default false
 directionalLight.shadow.radius = 1;
 // scene.add( directionalLight );
 
