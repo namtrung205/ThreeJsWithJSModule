@@ -17,58 +17,65 @@
 
 <body>
     <div id="container">
-        <div id="material_container">
-            <img  id="material_01"  class="material_item_image" src="https://media.giphy.com/media/IXnygGeB6LPPi/giphy.gif" alt="mat_01_gif"/> 
-            <img id="material_02" class="material_item_image" src="https://media.giphy.com/media/IXnygGeB6LPPi/giphy.gif" alt="mat_02_gif"/> 
-            <img id="material_03" class="material_item_image" src="https://media.giphy.com/media/IXnygGeB6LPPi/giphy.gif" alt="mat_02_gif"/> 
-
+        <div id="product_container">
             <!-- Test Modal Window -->
 
             <!-- Modal: modalQuickView -->
             <div class="modal fade" id="modalQuickView" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
+                aria-hidden="false">
                 <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
                     <div class="row">
-                        <div class="col-lg-9">
-                        <!--Carousel Wrapper-->
-                        <div id="carousel-thumb" class="carousel slide carousel-fade carousel-thumbnails"
-                            data-ride="carousel">
-                            <!--Slides-->
-                            <div class="carousel-inner" role="listbox">
-                                <div class="carousel-item active">
-                                    <img class="d-block w-100"
-                                    src="https://www.boconcept.com/on/demandware.static/-/Sites-master-catalog/default/dwd633af54/images/700000/704909.jpg"
-                                    alt="First slide">
+                        <div class="col-lg-6">
+                        <div class="row">
+                            <!--Carousel Wrapper-->
+                            <div id="carousel-thumb" class="carousel slide carousel-fade carousel-thumbnails"
+                                data-ride="carousel">
+                                <!--Slides-->
+                                <div class="carousel-inner" role="listbox">
+                                    <div class="carousel-item active">
+                                        <img class="d-block w-100"
+                                        src="https://www.boconcept.com/on/demandware.static/-/Sites-master-catalog/default/dwd633af54/images/700000/704909.jpg"
+                                        alt="First slide">
+                                    </div>
                                 </div>
+                                <!--/.Slides-->
+                                <!--Controls-->
+                                <a class="carousel-control-prev" href="#carousel-thumb" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="carousel-control-next" href="#carousel-thumb" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                                </a>
+                                <!--/.Controls-->
+                                <ol class="carousel-indicators">
+                                <li data-target="#carousel-thumb" data-slide-to="0" class="active">
+                                    <img src="https://www.boconcept.com/on/demandware.static/-/Sites-master-catalog/default/dwd633af54/images/700000/704909.jpg" width="60">
+                                </li>
+                                <li data-target="#carousel-thumb" data-slide-to="1">
+                                    <img src="https://www.boconcept.com/on/demandware.static/-/Sites-master-catalog/default/dwd633af54/images/700000/704909.jpg" width="60">
+                                </li>
+                                <li data-target="#carousel-thumb" data-slide-to="2">
+                                    <img src="https://www.boconcept.com/on/demandware.static/-/Sites-master-catalog/default/dwd633af54/images/700000/704909.jpg" width="60">
+                                </li>
+                                </ol>
                             </div>
-                            <!--/.Slides-->
-                            <!--Controls-->
-                            <a class="carousel-control-prev" href="#carousel-thumb" role="button" data-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="sr-only">Previous</span>
-                            </a>
-                            <a class="carousel-control-next" href="#carousel-thumb" role="button" data-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="sr-only">Next</span>
-                            </a>
-                            <!--/.Controls-->
-                            <ol class="carousel-indicators">
-                            <li data-target="#carousel-thumb" data-slide-to="0" class="active">
-                                <img src="https://www.boconcept.com/on/demandware.static/-/Sites-master-catalog/default/dwd633af54/images/700000/704909.jpg" width="60">
-                            </li>
-                            <li data-target="#carousel-thumb" data-slide-to="1">
-                                <img src="https://www.boconcept.com/on/demandware.static/-/Sites-master-catalog/default/dwd633af54/images/700000/704909.jpg" width="60">
-                            </li>
-                            <li data-target="#carousel-thumb" data-slide-to="2">
-                                <img src="https://www.boconcept.com/on/demandware.static/-/Sites-master-catalog/default/dwd633af54/images/700000/704909.jpg" width="60">
-                            </li>
-                            </ol>
+                            <!--/.Carousel Wrapper-->
                         </div>
-                        <!--/.Carousel Wrapper-->
+
+                        <div class="row">
+                            <div id="material_item_image_button">
+                                <img id="material_01" class="material_item_image" src="https://media.giphy.com/media/IXnygGeB6LPPi/giphy.gif" alt="mat_01_gif"/> 
+                                <img id="material_02" class="material_item_image" src="https://media.giphy.com/media/IXnygGeB6LPPi/giphy.gif" alt="mat_02_gif"/> 
+                                <img id="material_03" class="material_item_image" src="https://media.giphy.com/media/IXnygGeB6LPPi/giphy.gif" alt="mat_03_gif"/> 
+                            </div>
                         </div>
-                        <div class="col-lg-3">
+
+                        </div>
+                        <div class="col-lg-6">
                         <h2 class="h2-responsive product-name">
                             <strong>Product Name</strong>
                         </h2>

@@ -4,13 +4,11 @@
     justify-content: center;
 }
 
-
-/* pop up material */
 #material_container {
 
     position: absolute;
-    width: 400px;
-    height: 100px;
+    width: 100%;
+    height: 100%;
 
     border: salmon 2px;
     background-color: rgba(red, green, blue, 0);
@@ -21,6 +19,12 @@
     top: 80%;
 }
 
+.row {
+    /* align-items: center; */
+    justify-content: center;
+    background-color: rgba(red, green, blue, 0);
+}
+
 .material_item_image
 {
     width:120px;
@@ -29,6 +33,10 @@
     position: relative;
     border: solid 5px white;
     border-radius: 60px;
-
     margin: 0 auto;
+}
+
+.modal-lg {
+    max-width: 80% !important;
+    background-color: rgba(red, green, blue, 0);
 }

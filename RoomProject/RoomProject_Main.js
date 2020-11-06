@@ -79,10 +79,9 @@ var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 var selectedObjects = [];
 var composer, effectFXAA, outlinePass, saoPass, bloomPass;
-var material_select_container  = document.getElementById( 'material_container' );
+var material_select_container  = document.getElementById( 'product_container' );
 var infor_select_container  = document.getElementById( 'modalQuickView' );
 
-material_select_container.style.opacity = 0;
 var envMap;
 
 
@@ -156,39 +155,39 @@ var wall_mat = new THREE.MeshPhysicalMaterial( {
 
 
 //Map floor 1 ThreeJsWithJSModule\models\fbx\house\narrow-floorboards1-albedo.png
-var map_text_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_COLOR.jpg' );
-map_text_floor.wrapS = THREE.RepeatWrapping;
-map_text_floor.wrapT = THREE.RepeatWrapping;
+var map_text_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_COLOR.png' );
+// map_text_floor.wrapS = THREE.RepeatWrapping;
+// map_text_floor.wrapT = THREE.RepeatWrapping;
 
 var map_normal_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_NORM.jpg' );
-map_normal_floor.wrapS = THREE.RepeatWrapping;
-map_normal_floor.wrapT = THREE.RepeatWrapping;
+// map_normal_floor.wrapS = THREE.RepeatWrapping;
+// map_normal_floor.wrapT = THREE.RepeatWrapping;
 
 
 var map_roughness_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_ROUGH.jpg');
-map_roughness_floor.wrapS = THREE.RepeatWrapping;
-map_roughness_floor.wrapT = THREE.RepeatWrapping;
+// map_roughness_floor.wrapS = THREE.RepeatWrapping;
+// map_roughness_floor.wrapT = THREE.RepeatWrapping;
 
 
 
 var map_aoMap_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_OCC.jpg');
-map_aoMap_floor.wrapS = THREE.RepeatWrapping;
-map_aoMap_floor.wrapT = THREE.RepeatWrapping;
+// map_aoMap_floor.wrapS = THREE.RepeatWrapping;
+// map_aoMap_floor.wrapT = THREE.RepeatWrapping;
 
 
 var floor_mat = new THREE.MeshPhysicalMaterial( { 
 	map: map_text_floor,
-	roughnessMap:map_roughness_floor,
+	// roughnessMap:map_roughness_floor,
 	roughness : 1,
 
-	aoMap:map_aoMap_floor,
+	// aoMap:map_aoMap_floor,
 	aoMapIntensity : 0.02, 
 	envMapIntensity: 0.0,
 
-	normalMap: map_normal_floor,
-	normalScale : new THREE.Vector2(0.5, 0.5),
-	clearcoatNormalScale: new THREE.Vector2( 2.0,  2.0 ),
-	clearcoatNormalMap: map_normal_floor,
+	// normalMap: map_normal_floor,
+	// normalScale : new THREE.Vector2(0.5, 0.5),
+	// clearcoatNormalScale: new THREE.Vector2( 2.0,  2.0 ),
+	// clearcoatNormalMap: map_normal_floor,
 
 	clearcoat: 0.5,
 
@@ -308,7 +307,7 @@ function checkIntersection()
 }
 
 function fadeOut(element) {
-	$('#modalQuickView').modal('toggle');
+	
     var op = 1;  // initial opacity
     var timer = setInterval(function () {
         if (op <= 0.1){
@@ -321,8 +320,17 @@ function fadeOut(element) {
     }, 50);
 }
 
+$('#modalQuickView').on('shown.bs.modal', function (e) {
+	console.log("Modal Show, lock Object");
+	lockSelectObjects = true;
+})
+
+$('#modalQuickView').on('hidden.bs.modal', function (e) {
+	console.log("Modal Hiden");
+	lockSelectObjects = false;
+})
+
 function fadeIn(element) {
-	$('#modalQuickView').modal('toggle');
     var op = 0.1;  // initial opacity
     element.style.display = 'block';
     var timer = setInterval(function () {
@@ -345,7 +353,7 @@ function onMousedblClick( event )
 	else
 	{
 		lockSelectObjects = true;
-		fadeIn(material_select_container);
+		$('#modalQuickView').modal('show');
 		if(outlinePass.selectedObjects[0] === light_01_object)
 		{
 			if(light_01.intensity > 0)
@@ -367,31 +375,6 @@ function onMousedblClick( event )
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 }
 
-window.oncontextmenu = function ()
-{
-    return false;     // cancel default menu
-}
-
-document.body.onmousedown = function (e) {
-    var isRightMB;
-    e = e || window.event;
-
-	console.log(e);
-
-    if ("which" in e)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-        isRightMB = e.which == 3; 
-    else if ("button" in e)  // IE, Opera 
-        isRightMB = e.button == 2; 
-
-	console.log("isRMB : " + isRightMB);
-	if(isRightMB)
-	{
-		fadeOut(material_select_container);
-		lockSelectObjects = false;
-	}
-
-} 
-
 
 function onMouseMove( event ) 
 {
@@ -400,17 +383,17 @@ function onMouseMove( event )
 
 	if(!lockSelectObjects)
 	{
-		console.log("unlocking select object")
+		// console.log("unlocking select object")
 		checkIntersection();
 	}
 	else
 	{
-		console.log("locking select object")
+		// console.log("locking select object")
 	}
 }
 
 function onMouseClickMaterialItem(event) {
-	console.log(selectedObjects);
+	console.log(event.target);
 }
 
 //Add Event for material iamge
@@ -528,7 +511,7 @@ async function loadModelWithHDR() {
 function readModel() {
 		// //FBXloader
 		const gltfLoader = new GLTFLoader();
-		const url = './models/gltf/RoomHouse.gltf';
+		const url = './models/gltf/TestRoom.gltf';
 		// const url = '../models/gltf/Rooms/livingtable/scene.gltf';
 		gltfLoader.load(url, (gltf) => 
 		{
