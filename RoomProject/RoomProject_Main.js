@@ -43,7 +43,7 @@ var container = document.getElementById( 'container' );
 var scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x808080 );
 var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 0.1, 1000000 );
-camera.position.set( 0, 0, 0 );
+camera.position.set( 0, 1.75, 0 );
 var frustumSize = 20;
 var renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true });
 
@@ -156,8 +156,8 @@ var wall_mat = new THREE.MeshPhysicalMaterial( {
 
 //Map floor 1 ThreeJsWithJSModule\models\fbx\house\narrow-floorboards1-albedo.png
 var map_text_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_COLOR.png' );
-// map_text_floor.wrapS = THREE.RepeatWrapping;
-// map_text_floor.wrapT = THREE.RepeatWrapping;
+map_text_floor.wrapS = THREE.RepeatWrapping;
+map_text_floor.wrapT = THREE.RepeatWrapping;
 
 var map_normal_floor = tex_loader.load( '../models/fbx/house/texture/narrow-floorboards1-ue/Wood_Floor_007_NORM.jpg' );
 // map_normal_floor.wrapS = THREE.RepeatWrapping;
@@ -370,7 +370,7 @@ function onMousedblClick( event )
 			}
 		}
 
-		// fitCameraToObject(camera, outlinePass.selectedObjects[0], 0.5);
+		fitCameraToObject(camera, outlinePass.selectedObjects[0], 0.1);
 	}
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -546,7 +546,6 @@ function readModel() {
 			// root.scale.set(0.22, 0.22, 0.22);
 			root.rotateY(-3.14/2);
 			scene.add(root);
-			// fitCameraToObject(camera, root, 15);
 		});
 	
 		const url_table = '../models/gltf/Rooms/livingtable/scene.gltf';
@@ -565,7 +564,7 @@ function readModel() {
 			root.position.set(-0.2, 0.48, -0.6);
 			// root.rotateY(-3.14/2);
 			scene.add(root);
-			// fitCameraToObject(camera, root, 0.3);
+			fitCameraToObject(camera, root, 0.1);
 		});
 	}
 
@@ -588,7 +587,7 @@ function fitCameraToObject( camera, object, offset ) {
 						((size.y/2)+offset) / Math.abs(Math.tan(camera.fov/2)) / camera.aspect ;
 		camera.position.set(
 		camera.position.x * endDistance / startDistance,
-		camera.position.y * endDistance / startDistance + 1.5,
+		camera.position.y,
 		camera.position.z * endDistance / startDistance ,
 		);
 	camera.lookAt(center);
