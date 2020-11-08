@@ -1,8 +1,11 @@
 #container
 {
-    display: flex;
-    justify-content: center;
+    display: block; /* fix necessary to remove space at bottom of canvas */
 }
+
+body {
+    overflow: hidden; /* Hide scrollbars */
+  }
 
 #material_container {
 

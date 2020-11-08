@@ -81,7 +81,7 @@ var selectedObjects = [];
 var composer, effectFXAA, outlinePass, saoPass, bloomPass;
 var material_select_container  = document.getElementById( 'product_container' );
 var infor_select_container  = document.getElementById( 'modalQuickView' );
-
+var mousePoint = null;
 var envMap;
 
 
@@ -285,13 +285,15 @@ function checkIntersection()
 	if ( intersects.length > 0 ) 
 	{
 		var selectedObject = intersects[ 0 ].object;
+
+		
 		//Check if plan, get point to move
 		if(selectedObject)
 		{
 			if(selectedObject.name === "FloorSurface")
 			{
+				mousePoint = intersects[ 0 ].point;
 				selectedObjects = [];
-				
 			}
 			else if(selectedObject.name !== "spot_camera_pointer" )
 			{
@@ -563,7 +565,7 @@ function readModel() {
 			root.position.set(-0.2, 0.48, -0.6);
 			// root.rotateY(-3.14/2);
 			scene.add(root);
-			fitCameraToObject(camera, root, 0.3);
+			// fitCameraToObject(camera, root, 0.3);
 		});
 	}
 
@@ -592,22 +594,41 @@ function fitCameraToObject( camera, object, offset ) {
 	camera.lookAt(center);
 	}
 
-onWindowResize();
+
+// remember these initial values
+var tanFOV = Math.tan( ( ( Math.PI / 180 ) * camera.fov / 2 ) );
+var windowHeight = window.innerHeight;
 
 function onWindowResize() {
-	var w = container.clientWidth;
-	var h = container.clientHeight;
-	var aspect = w / h;
-	camera.left   = - frustumSize * aspect / 2;
-	camera.right  =   frustumSize * aspect / 2;
-	camera.top    =   frustumSize / 2;
-	camera.bottom = - frustumSize / 2;
+	// var w = container.clientWidth;
+	// var h = container.clientHeight;
+	// var aspect = w / h;
+	// camera.left   = - frustumSize * aspect / 2;
+	// camera.right  =   frustumSize * aspect / 2;
+	// camera.top    =   frustumSize / 2;
+	// camera.bottom = - frustumSize / 2;
+	// camera.fov = (360 / Math.PI) * Math.atan(tanFOV * (window.innerHeight / windowHeight));
+	// camera.updateProjectionMatrix();
+	// renderer.setSize( w, h );
+	// resolution.set( w, h );
+	// console.log(w);
+	// controls.reset( camera, renderer.domElement );
+
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.fov = (360 / Math.PI) * Math.atan(tanFOV * (window.innerHeight / windowHeight));
 	camera.updateProjectionMatrix();
-	renderer.setSize( w, h );
-	resolution.set( w, h );
-	console.log(w);
-	controls.reset( camera, renderer.domElement );
+	// controls.reset( camera, renderer.domElement );
+
+	controls.update();
+
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	composer.setSize(window.innerWidth, window.innerHeight);
+	// renderer.render( scene, camera );
+	composer.render(scene, camera);
+
 }
+
+onWindowResize();
 
 window.addEventListener( 'resize', onWindowResize );
 

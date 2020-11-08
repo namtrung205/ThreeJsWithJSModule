@@ -215,8 +215,13 @@ var IndoorControls = function ( camera, domElement, scene ) {
 		if ( scope.ground.length > 0 ) {
 
 			// 将鼠标位置归一化为设备坐标
+			// var rect = scope.domElement.getBoundingClientRect();
 			mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
 			mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
+
+
+			// mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+			// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
 			// 通过相机和鼠标位置更新射线
 			raycaster.setFromCamera( mouse, scope.camera );
@@ -229,7 +234,6 @@ var IndoorControls = function ( camera, domElement, scene ) {
 
 				moveEvent.intersect = intersects[ 0 ];
 				scope.dispatchEvent( moveEvent );
-
 			}
 
 		}
@@ -268,14 +272,18 @@ var IndoorControls = function ( camera, domElement, scene ) {
 			if ( scope.ground.length > 0 ) {
 
 				// 将鼠标位置归一化为设备坐标
+				// var rect = scope.domElement.getBoundingClientRect();
 				mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
 				mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
+
+				// mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+				// mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
 				// 通过相机和鼠标位置更新射线
 				raycaster.setFromCamera( mouse, scope.camera );
 
 				// 计算物体和射线的交点信息
-				intersects = raycaster.intersectObjects( scope.ground, true );
+				intersects = raycaster.intersectObjects( scope.ground, false );
 
 				// 触发鼠标在地面时的移动事件
 				if ( intersects.length > 0 ) {
@@ -330,7 +338,7 @@ var IndoorControls = function ( camera, domElement, scene ) {
 
 			// 需要避免相机移动到垂直于y轴的物体表面（如墙面）
 			_r1.set( scope.camera.position, _v2.set( 0, - 1, 0 ) );
-			target.y += scope.camera.position.y - _r1.intersectObjects( scope.ground, true )[ 0 ].point.y;
+			target.y += scope.camera.position.y - _r1.intersectObjects( scope.ground, false )[ 0 ].point.y;
 
 			if ( target.equals( scope.camera.position ) ) return;
 
@@ -558,6 +566,8 @@ var IndoorControls = function ( camera, domElement, scene ) {
 
 	// 在动画更新函数中调用
 	this.update = function () {
+
+		rect = scope.domElement.getBoundingClientRect();
 
 		var time = performance.now();
 		var interval = ( time - prevTime ) / 1000;
