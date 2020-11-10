@@ -90,14 +90,14 @@ var lockSelectObjects = false;
 var list_root_item_object_name = 
 [
 	"Wall",
+	"Name product",
+	"tea_table",
 	"FloorSurface"
 ]
 
 //#region Material
 //Texture Loader
 var tex_loader = new THREE.TextureLoader();
-
-
 //#region Floor Mat
 
 //GlassMat
@@ -285,14 +285,11 @@ function checkIntersection()
 	if ( intersects.length > 0 ) 
 	{
 		var selectedObject = intersects[ 0 ].object;
-
-		
 		//Check if plan, get point to move
 		if(selectedObject)
 		{
 			if(selectedObject.name === "FloorSurface")
 			{
-				mousePoint = intersects[ 0 ].point;
 				selectedObjects = [];
 			}
 			else if(selectedObject.name !== "spot_camera_pointer" )
@@ -308,19 +305,12 @@ function checkIntersection()
 	outlinePass.selectedObjects = selectedObjects;
 }
 
-function fadeOut(element) {
-	
-    var op = 1;  // initial opacity
-    var timer = setInterval(function () {
-        if (op <= 0.1){
-            clearInterval(timer);
-            element.style.display = 'none';
-        }
-        element.style.opacity = op;
-        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
-        op -= op * 0.1;
-    }, 50);
+function getRootParentOfSelected(selectedObject)
+{
+
 }
+
+
 
 $('#modalQuickView').on('shown.bs.modal', function (e) {
 	console.log("Modal Show, lock Object");
@@ -331,19 +321,6 @@ $('#modalQuickView').on('hidden.bs.modal', function (e) {
 	console.log("Modal Hiden");
 	lockSelectObjects = false;
 })
-
-function fadeIn(element) {
-    var op = 0.1;  // initial opacity
-    element.style.display = 'block';
-    var timer = setInterval(function () {
-        if (op >= 1){
-            clearInterval(timer);
-        }
-        element.style.opacity = op;
-        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
-        op += op * 0.1;
-    }, 10);
-}
 
 function onMousedblClick( event ) 
 {
@@ -385,12 +362,10 @@ function onMouseMove( event )
 
 	if(!lockSelectObjects)
 	{
-		// console.log("unlocking select object")
 		checkIntersection();
 	}
 	else
 	{
-		// console.log("locking select object")
 	}
 }
 
@@ -442,8 +417,8 @@ function init() {
 	scene.background = texture;
 
 
-	loadModelWithHDR();
-	readModel();
+	loadHDR();
+	loadModel();
 
 	composer = new EffectComposer( renderer );
 
@@ -493,7 +468,7 @@ function init() {
 	} );
 }
 
-async function loadModelWithHDR() {
+async function loadHDR() {
 	var pmremGenerator = new THREE.PMREMGenerator( renderer );
 	pmremGenerator.compileEquirectangularShader();
 
@@ -510,7 +485,7 @@ async function loadModelWithHDR() {
 }	
 
 
-function readModel() {
+function loadModel() {
 		// //FBXloader
 		const gltfLoader = new GLTFLoader();
 		const url = './models/gltf/TestRoom.gltf';
@@ -560,6 +535,7 @@ function readModel() {
 				child.castShadow = true;
 				child.receiveShadow = true;
 			});
+			root.name = "tea_table";
 			root.scale.set(1/175, 1/175, 1/175);
 			root.position.set(-0.2, 0.48, -0.6);
 			// root.rotateY(-3.14/2);
@@ -599,32 +575,15 @@ var tanFOV = Math.tan( ( ( Math.PI / 180 ) * camera.fov / 2 ) );
 var windowHeight = window.innerHeight;
 
 function onWindowResize() {
-	// var w = container.clientWidth;
-	// var h = container.clientHeight;
-	// var aspect = w / h;
-	// camera.left   = - frustumSize * aspect / 2;
-	// camera.right  =   frustumSize * aspect / 2;
-	// camera.top    =   frustumSize / 2;
-	// camera.bottom = - frustumSize / 2;
-	// camera.fov = (360 / Math.PI) * Math.atan(tanFOV * (window.innerHeight / windowHeight));
-	// camera.updateProjectionMatrix();
-	// renderer.setSize( w, h );
-	// resolution.set( w, h );
-	// console.log(w);
-	// controls.reset( camera, renderer.domElement );
-
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.fov = (360 / Math.PI) * Math.atan(tanFOV * (window.innerHeight / windowHeight));
 	camera.updateProjectionMatrix();
-	// controls.reset( camera, renderer.domElement );
 
-	controls.update();
+	controls.update(); //Need to Update controls
 
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	composer.setSize(window.innerWidth, window.innerHeight);
-	// renderer.render( scene, camera );
 	composer.render(scene, camera);
-
 }
 
 onWindowResize();
