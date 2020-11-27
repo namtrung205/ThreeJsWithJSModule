@@ -347,7 +347,7 @@ function onMousedblClick( event )
 			}
 		}
 
-		fitCameraToObject(camera, outlinePass.selectedObjects[0], 0.1);
+		// fitCameraToObject(camera, outlinePass.selectedObjects[0], 0.1);
 	}
 
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -405,20 +405,11 @@ function init() {
 	// rectLight.add( rectLightHelper );
 
 
-	const loader = new THREE.CubeTextureLoader();
-	const texture = loader.load([
-		'../Libs/ThreeJs/textures/cube/Park2/posx.jpg',
-		'../Libs/ThreeJs/textures/cube/Park2/negx.jpg',
-		'../Libs/ThreeJs/textures/cube/Park2/posy.jpg',
-		'../Libs/ThreeJs/textures/cube/Park2/negy.jpg',
-		'../Libs/ThreeJs/textures/cube/Park2/posz.jpg',
-		'../Libs/ThreeJs/textures/cube/Park2/negz.jpg',
-	]);
-	scene.background = texture;
-
-
-	loadHDR();
 	loadModel();
+	loadHDR();
+
+
+
 
 	composer = new EffectComposer( renderer );
 
@@ -484,10 +475,58 @@ async function loadHDR() {
 	pmremGenerator.dispose();
 }	
 
-
 function loadModel() {
+
+	var count = $(('#count'));
+	var progressBar = $(('#loadding_bar'));
+	// var progressBar = document.getElementById("loadding_bar");
+	let numPercent = 0;
+
+	const manager = new THREE.LoadingManager();
+	manager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+		console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+	};
+
+	manager.onLoad = function ( ) {
+		console.log( 'Loading complete!');
+		progressBar.text("Enter");
+		progressBar.css('cursor', "pointer");
+		progressBar.on("click", closeNav)
+
+		const loader = new THREE.CubeTextureLoader();
+		const texture = loader.load([
+			'../Libs/ThreeJs/textures/cube/Park2/posx.jpg',
+			'../Libs/ThreeJs/textures/cube/Park2/negx.jpg',
+			'../Libs/ThreeJs/textures/cube/Park2/posy.jpg',
+			'../Libs/ThreeJs/textures/cube/Park2/negy.jpg',
+			'../Libs/ThreeJs/textures/cube/Park2/posz.jpg',
+			'../Libs/ThreeJs/textures/cube/Park2/negz.jpg',
+		]);
+		scene.background = texture;
+	};
+
+	manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+		let currentPercent = Math.ceil(itemsLoaded * 100/ itemsTotal);
+		if(currentPercent > numPercent)
+		{
+			numPercent = currentPercent;
+			count.text( numPercent + "%");
+			// progressBar.style["width"] = numPercent + "%";
+			progressBar.css('width', numPercent + "%");
+			progressBar.text(numPercent + "%");
+		}
+
+		
+		console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+	};
+	manager.onError = function ( url ) {
+		console.log( 'There was an error loading ' + url );
+	};
+
+
+
 		// //FBXloader
-		const gltfLoader = new GLTFLoader();
+		const gltfLoader = new GLTFLoader(manager);
 		const url = './models/gltf/TestRoom.gltf';
 		// const url = '../models/gltf/Rooms/livingtable/scene.gltf';
 		gltfLoader.load(url, (gltf) => 
@@ -523,25 +562,27 @@ function loadModel() {
 			scene.add(root);
 		});
 	
-		const url_table = '../models/gltf/Rooms/livingtable/scene.gltf';
-		// const url = '../models/gltf/Rooms/livingtable/scene.gltf';
-		gltfLoader.load(url_table, (gltf) => 
-		{
-			const root = gltf.scene;
-			root.traverse( function ( child ) 
-			{
-				var childname = child.name;
-				console.log(childname);
-				child.castShadow = true;
-				child.receiveShadow = true;
-			});
-			root.name = "tea_table";
-			root.scale.set(1/175, 1/175, 1/175);
-			root.position.set(-0.2, 0.48, -0.6);
-			// root.rotateY(-3.14/2);
-			scene.add(root);
-			fitCameraToObject(camera, root, 0.1);
-		});
+		//Load 2nd Model
+
+		// const url_table = '../models/gltf/Rooms/livingtable/scene.gltf';
+		// // const url = '../models/gltf/Rooms/livingtable/scene.gltf';
+		// gltfLoader.load(url_table, (gltf) => 
+		// {
+		// 	const root = gltf.scene;
+		// 	root.traverse( function ( child ) 
+		// 	{
+		// 		var childname = child.name;
+		// 		console.log(childname);
+		// 		child.castShadow = true;
+		// 		child.receiveShadow = true;
+		// 	});
+		// 	root.name = "tea_table";
+		// 	root.scale.set(1/175, 1/175, 1/175);
+		// 	root.position.set(-0.2, 0.48, -0.6);
+		// 	// root.rotateY(-3.14/2);
+		// 	scene.add(root);
+		// 	fitCameraToObject(camera, root, 0.1);
+		// });
 	}
 
 function fitCameraToObject( camera, object, offset ) {

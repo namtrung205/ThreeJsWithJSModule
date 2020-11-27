@@ -8,7 +8,7 @@ body
     overflow: hidden; /* Hide scrollbars */
 }
 
-
+/* 
 #product_container 
 {
     position: absolute;
@@ -22,7 +22,7 @@ body
     justify-content: center;
 
     top: 80%;
-}
+} */
 
 .row {
     /* align-items: center; */
@@ -62,7 +62,7 @@ body
 /* The side navigation menu */
 .sidenav {
     height: 100%; /* 100% Full-height */
-    width: 0; /* 0 width - change this with JavaScript */
+    width: 350px; /* 0 width - change this with JavaScript */
     position: fixed; /* Stay in place */
     z-index: 1; /* Stay on top */
     top: 10; /* Stay at the top */
@@ -110,3 +110,18 @@ body
     .sidenav {padding-top: 15px;}
     .sidenav a {font-size: 18px;}
 }
+
+
+#animated
+{
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#progress_bar_container {
+    width: 50%;
+    margin: 0 auto;
+  }
