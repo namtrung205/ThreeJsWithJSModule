@@ -479,6 +479,7 @@ function loadModel() {
 
 	var count = $(('#count'));
 	var progressBar = $(('#loadding_bar'));
+
 	// var progressBar = document.getElementById("loadding_bar");
 	let numPercent = 0;
 
@@ -491,7 +492,7 @@ function loadModel() {
 		console.log( 'Loading complete!');
 		progressBar.text("Enter");
 		progressBar.css('cursor', "pointer");
-		progressBar.on("click", closeNav)
+		progressBar.on("click", closeNav);
 
 		const loader = new THREE.CubeTextureLoader();
 		const texture = loader.load([
