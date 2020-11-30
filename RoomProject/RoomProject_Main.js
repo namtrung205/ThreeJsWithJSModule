@@ -40,6 +40,7 @@ import { OrbitControls } from '../Libs/ThreeJs/jsm/controls/OrbitControls.js';
 
 //Setup SCene
 var container = document.getElementById( 'container' );
+var rootModel;
 var scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x808080 );
 var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 0.1, 1000000 );
@@ -89,10 +90,11 @@ var envMap;
 var lockSelectObjects = false;
 var list_root_item_object_name = 
 [
-	"Wall",
-	"Name product",
-	"tea_table",
-	"FloorSurface"
+	"FloorSurface",
+	"Carpet",
+	"GreySofa",
+	"SingleChair",
+	"DinningTable",
 ]
 
 //#region Material
@@ -294,23 +296,62 @@ function checkIntersection()
 			}
 			else if(selectedObject.name !== "spot_camera_pointer" )
 			{
-				addSelectedObject( selectedObject );
+				var root_parent_object = getRootParentOfSelected(selectedObject);
+				if(root_parent_object)
+				{
+					if(list_root_item_object_name.includes(root_parent_object.name))
+					{
+						outlinePass.selectedObjects = selectedObjects;
+					}
+					else
+					{
+						selectedObjects = [];
+					}
+				}
+				else
+				{
+					selectedObjects = [];
+				}
+
 			}
+		}
+		else
+		{
+			selectedObjects = [];
 		}
 	} 
 	else 
 	{
-		outlinePass.selectedObjects = [];
+		selectedObjects = [];
 	}
 	outlinePass.selectedObjects = selectedObjects;
 }
 
 function getRootParentOfSelected(selectedObject)
-{
+{	if(selectedObject)
+	{
+		if(selectedObject.parent)
+		{
+			if(selectedObject.parent == rootModel)
+			{
+				selectedObjects = [];
 
+				selectedObject.traverse( function ( child ) 
+				{
+					if(child instanceof  THREE.Mesh)
+					{
+						selectedObjects.push(child)
+					}
+				});
+				return selectedObject;
+			}
+			else
+			{
+				return getRootParentOfSelected(selectedObject.parent);
+			}
+		}
+	}
 }
-
-
 
 $('#modalQuickView').on('shown.bs.modal', function (e) {
 	console.log("Modal Show, lock Object");
@@ -404,12 +445,8 @@ function init() {
 	// var rectLightHelper = new RectAreaLightHelper( rectLight );
 	// rectLight.add( rectLightHelper );
 
-
 	loadModel();
 	loadHDR();
-
-
-
 
 	composer = new EffectComposer( renderer );
 
@@ -525,7 +562,6 @@ function loadModel() {
 	};
 
 
-
 		// //FBXloader
 		const gltfLoader = new GLTFLoader(manager);
 		const url = './models/gltf/TestRoom.gltf';
@@ -533,6 +569,7 @@ function loadModel() {
 		gltfLoader.load(url, (gltf) => 
 		{
 			const root = gltf.scene;
+			rootModel = root;
 			root.traverse( function ( child ) 
 			{
 				var childname = child.name;
@@ -633,10 +670,9 @@ onWindowResize();
 window.addEventListener( 'resize', onWindowResize );
 
 function render() {
-
-	requestAnimationFrame( render );
 	controls.update();
 	// renderer.render( scene, camera );
 	composer.render(); //This render() will show outline of object
+	requestAnimationFrame( render );
 }
 //#endregion
